@@ -1,0 +1,15 @@
+24-06-30.18:00:52.494 [main            ] INFO  Application            - Starting Application using Java 1.8.0_261 on hornor with PID 15588 (D:\code\JavaWeb\project\big-market\big-market-app\target\classes started by ye'qiu in D:\code\JavaWeb\project\big-market)
+24-06-30.18:00:52.496 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+24-06-30.18:00:53.075 [main            ] WARN  ClassPathMapperScanner - No MyBatis mapper was found in '[cn.bugstack]' package. Please check your configuration.
+24-06-30.18:00:53.444 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port(s): 8091 (http)
+24-06-30.18:00:53.452 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+24-06-30.18:00:53.453 [main            ] INFO  StandardService        - Starting service [Tomcat]
+24-06-30.18:00:53.453 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/9.0.75]
+24-06-30.18:00:53.596 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+24-06-30.18:00:53.596 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1061 ms
+24-06-30.18:00:54.123 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+24-06-30.18:00:54.138 [main            ] INFO  TomcatWebServer        - Tomcat started on port(s): 8091 (http) with context path ''
+24-06-30.18:00:54.145 [main            ] INFO  Application            - Started Application in 2.158 seconds (JVM running for 3.777)
+24-06-30.18:01:10.856 [http-nio-8091-exec-1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+24-06-30.18:01:10.856 [http-nio-8091-exec-1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+24-06-30.18:01:10.857 [http-nio-8091-exec-1] INFO  DispatcherServlet      - Completed initialization in 1 ms
