@@ -1,7 +1,9 @@
 package cn.bugstack.test;
 
 import cn.bugstack.infrastructure.persistent.dao.AwardDao;
+import cn.bugstack.infrastructure.persistent.dao.StrategyRuleDao;
 import cn.bugstack.infrastructure.persistent.po.Award;
+import cn.bugstack.infrastructure.persistent.po.StrategyRule;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -19,6 +21,8 @@ public class ApiTest {
 
     @Resource
     AwardDao awardDao;
+    @Resource
+    StrategyRuleDao strategyRuleDao;
 
     @Test
     public void test() {

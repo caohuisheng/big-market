@@ -1,6 +1,9 @@
 package cn.bugstack.test.domain;
 
 import cn.bugstack.domain.strategy.service.armory.IStrategyArmory;
+import cn.bugstack.domain.strategy.service.armory.IStrategyDispatch;
+import cn.bugstack.infrastructure.persistent.dao.StrategyRuleDao;
+import cn.bugstack.infrastructure.persistent.po.StrategyRule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +24,8 @@ public class StrategyTest {
 
     @Resource
     IStrategyArmory strategyArmory;
+    @Resource
+    IStrategyDispatch strategyDispatch;
 
     @Test
     public void test_strategyArmory(){
@@ -29,10 +34,28 @@ public class StrategyTest {
     }
 
     @Test
-    public void test_randomAwardId(){
-        for(int i=0;i<10;i++){
-            Integer randomAwardId = strategyArmory.getRandomAwardId(100001L);
-            log.info("award_id:{}",randomAwardId);
+    public void test_getRandomAwardId(){
+        //for(int i=0;i<10;i++){
+        //    Integer randomAwardId = strategyArmory.getRandomAwardId(100001L);
+        //    log.info("award_id:{}",randomAwardId);
+        //}
+    }
+
+    @Test
+    public void test_strategyWeightArmory(){
+        boolean res = strategyArmory.assembleLotteryStrategy(100001L);
+        log.info("装配结果：{}",res);
+    }
+
+    /**
+     * 根据策略id+权重值，从装配的结果中随机获取奖品id
+     */
+    @Test
+    public void test_getRandomAwardIdWeight(){
+        int[] weightValues = new int[]{4000,5000,6000};
+        for(int weightValue:weightValues){
+            Integer award_id = strategyDispatch.getRandomAwardId(100001L, ""+weightValue);
+            log.info("测试结果：{} - weight_value:{}",award_id,weightValue);
         }
     }
 }

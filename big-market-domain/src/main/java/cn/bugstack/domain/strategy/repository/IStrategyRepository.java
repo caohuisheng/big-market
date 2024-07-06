@@ -1,6 +1,9 @@
 package cn.bugstack.domain.strategy.repository;
 
 import cn.bugstack.domain.strategy.model.entity.StrategyAwardEntity;
+import cn.bugstack.domain.strategy.model.entity.StrategyEntity;
+import cn.bugstack.domain.strategy.model.entity.StrategyRuleEntity;
+import org.springframework.boot.autoconfigure.web.WebProperties;
 
 import java.util.Date;
 import java.util.List;
@@ -12,13 +15,19 @@ import java.util.Map;
  * @create 2023-12-23 09:33
  */
 public interface IStrategyRepository {
-
     List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId);
 
-    void storeStrategyAwardSearchRateTable(Long strategyId, Integer rateRange, Map<Integer, Integer> strategyAwardSearchRateTable);
+    void storeStrategyAwardSearchRateTable(String key, Integer rateRange, Map<Integer, Integer> strategyAwardSearchRateTable);
 
-    Integer getStrategyAwardAssemble(Long strategyId, Integer rateKey);
+    Integer getStrategyAwardAssemble(Long strategyId, Integer randomIndex);
+
+    Integer getStrategyAwardAssemble(String keySuffix, Integer randomIndex);
 
     int getRateRange(Long strategyId);
 
+    int getRateRange(String keySuffix);
+
+    StrategyEntity queryStrategyEntityByStrategyId(Long strategyId);
+
+    StrategyRuleEntity queryStrategyRuleEntity(Long strategyId,String ruleWeight);
 }

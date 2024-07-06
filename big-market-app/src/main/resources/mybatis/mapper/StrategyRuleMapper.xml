@@ -17,4 +17,8 @@
         SELECT * FROM strategy_rule
     </select>
 
+    <select id="queryStrategyRule" resultMap="DataMap">
+        select * from strategy_rule where strategy_id = #{strategyId} and rule_model = #{ruleModel}
+    </select>
+
 </mapper>

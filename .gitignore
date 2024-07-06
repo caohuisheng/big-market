@@ -1,7 +1,9 @@
-target/
+target/**
+!**/target/**
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+.gitignore
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -11,6 +13,7 @@ target/
 *.iws
 *.iml
 *.ipr
+*.log
 
 ### Eclipse ###
 .apt_generated

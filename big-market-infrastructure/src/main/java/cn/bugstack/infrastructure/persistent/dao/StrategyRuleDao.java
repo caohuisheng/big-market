@@ -14,5 +14,19 @@ import java.util.List;
  */
 @Mapper
 public interface StrategyRuleDao {
-    List<StrategyRule> queryStrategyList();
+    /**
+     * 查询所有策略规则的列表
+     * @return
+     */
+    List<StrategyRule> queryStrategyRuleList();
+
+    /**
+     * 根据策略id和规则模型查询策略规则
+     * @return
+     */
+    StrategyRule queryStrategyRule(Long strategyId, String ruleModel);
+
+    StrategyRule queryStrategyRule1(StrategyRule strategyRule);
+
+    List<StrategyRule> queryStrategyRuleList1(Long strategyId, String ruleModel);
 }
