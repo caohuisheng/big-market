@@ -1,20 +1,17 @@
-package cn.bugstack.infrastructure.persistent.po;
+package cn.bugstack.domain.strategy.model.entity;
 
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * @Author: chs
- * @CreateTime: 2024-07-05
- * @Description: 策略奖品实体类
- * @Version: 1.0
+ * @CreateTime: 2024-07-06
+ * @Description: 策略奖品实体
  */
 @Data
-public class StrategyAward {
-    // 自增ID
-    private Long id;
+public class StrategyAwardEntity {
+
     // 抽奖策略ID
     private Long strategyId;
     // 抽奖奖品ID - 内部流转使用
@@ -33,9 +30,5 @@ public class StrategyAward {
     private String ruleModels;
     // 排序
     private Integer sort;
-    // 创建时间
-    private Date createTime;
-    // 更新时间
-    private Date updateTime;
 
 }
