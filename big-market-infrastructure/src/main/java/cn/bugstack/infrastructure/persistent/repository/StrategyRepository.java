@@ -116,4 +116,9 @@ public class StrategyRepository implements IStrategyRepository {
         BeanUtils.copyProperties(strategyRule, strategyRuleEntity);
         return strategyRuleEntity;
     }
+
+    @Override
+    public String queryStrategyRuleValue(Long strategyId, Integer awardId, String ruleModel) {
+        return strategyRuleDao.queryStrategyRuleValue(strategyId, awardId, ruleModel);
+    }
 }

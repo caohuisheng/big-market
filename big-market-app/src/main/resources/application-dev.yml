@@ -33,6 +33,8 @@ spring:
 mybatis:
   mapper-locations: classpath:/mybatis/mapper/*.xml
   config-location:  classpath:/mybatis/config/mybatis-config.xml
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # Redis
 redis:
@@ -49,8 +51,9 @@ redis:
       ping-interval: 60000
       keep-alive: true
 
+
 # 日志
 logging:
   level:
-    root: info
+    root: debug
   config: classpath:logback-spring.xml

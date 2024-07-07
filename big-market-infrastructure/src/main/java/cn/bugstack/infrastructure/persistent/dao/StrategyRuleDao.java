@@ -26,7 +26,10 @@ public interface StrategyRuleDao {
      */
     StrategyRule queryStrategyRule(Long strategyId, String ruleModel);
 
-    StrategyRule queryStrategyRule1(StrategyRule strategyRule);
+    /**
+     * 查询规则值
+     * @return
+     */
+    String queryStrategyRuleValue(Long strategyId,Integer awardId, String ruleModel);
 
-    List<StrategyRule> queryStrategyRuleList1(Long strategyId, String ruleModel);
 }

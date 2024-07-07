@@ -19,6 +19,17 @@ public class StrategyEntity {
     // 规则模型
     private String ruleModels;
 
+    /**
+     * 获取规则模型数组
+     * @return
+     */
+    public String[] getRuleModelArr(){
+        if(StringUtils.isBlank(ruleModels)){
+            return null;
+        }
+        return ruleModels.split(Constants.SPLIT);
+    }
+
     // 查看规则模型中是否包含rule_weight，若是则返回rule_weight
     public String getRuleWeight(){
         if(StringUtils.isBlank(ruleModels)) return null;

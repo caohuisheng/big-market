@@ -1,5 +1,6 @@
 package cn.bugstack.test.domain;
 
+import cn.bugstack.domain.strategy.service.IRaffleStrategy;
 import cn.bugstack.domain.strategy.service.armory.IStrategyArmory;
 import cn.bugstack.domain.strategy.service.armory.IStrategyDispatch;
 import cn.bugstack.infrastructure.persistent.dao.StrategyRuleDao;
@@ -57,5 +58,10 @@ public class StrategyTest {
             Integer award_id = strategyDispatch.getRandomAwardId(100001L, ""+weightValue);
             log.info("测试结果：{} - weight_value:{}",award_id,weightValue);
         }
+    }
+
+    @Test
+    public void test_performRaffle(){
+
     }
 }
