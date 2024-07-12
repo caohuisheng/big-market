@@ -8,7 +8,7 @@ package cn.bugstack.domain.strategy.service.armory;
 public interface IStrategyArmory {
 
     /**
-     * 装配抽奖策略配置（触发的时机可以为活动审核通过后调用）
+     * 装配抽奖策略（触发的时机可以为活动审核通过后调用）
      * @param strategyId
      * @return 装配结果
      */

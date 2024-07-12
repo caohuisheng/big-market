@@ -4,6 +4,7 @@ import cn.bugstack.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bugstack.infrastructure.persistent.po.Strategy;
 import cn.bugstack.infrastructure.persistent.po.StrategyAward;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -26,4 +27,12 @@ public interface StrategyAwardDao {
      * @return
      */
     List<StrategyAward> queryStrategyAwardListByStrategyId(Long strategyId);
+
+    /**
+     * 根据策略id和奖品id查询规则模型
+     * @param strategyId
+     * @param awardId
+     * @return
+     */
+    String queryStrategyAwardRuleModels(@Param("strategyId") Long  strategyId,@Param("awardId") Integer awardId);
 }

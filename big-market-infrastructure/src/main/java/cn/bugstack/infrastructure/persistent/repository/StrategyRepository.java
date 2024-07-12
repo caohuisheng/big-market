@@ -3,6 +3,7 @@ package cn.bugstack.infrastructure.persistent.repository;
 import cn.bugstack.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyRuleEntity;
+import cn.bugstack.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
 import cn.bugstack.infrastructure.persistent.dao.StrategyAwardDao;
 import cn.bugstack.infrastructure.persistent.dao.StrategyDao;
@@ -95,7 +96,7 @@ public class StrategyRepository implements IStrategyRepository {
     public StrategyEntity queryStrategyEntityByStrategyId(Long strategyId) {
         // 首先从缓存中查询
         String cacheKey = Constants.RedisKey.STRATEGY_KEY + strategyId;
-       StrategyEntity strategyEntity = redisService.getValue(cacheKey);
+        StrategyEntity strategyEntity = redisService.getValue(cacheKey);
         if(strategyEntity != null){
             return strategyEntity;
         }
@@ -120,5 +121,13 @@ public class StrategyRepository implements IStrategyRepository {
     @Override
     public String queryStrategyRuleValue(Long strategyId, Integer awardId, String ruleModel) {
         return strategyRuleDao.queryStrategyRuleValue(strategyId, awardId, ruleModel);
+    }
+
+    @Override
+    public StrategyAwardRuleModelVO queryStrategyAwardRuleModels(Long strategyId, Integer awardId) {
+        String ruleModels = strategyAwardDao.queryStrategyAwardRuleModels(strategyId, awardId);
+        return StrategyAwardRuleModelVO.builder()
+                .ruleModels(ruleModels)
+                .build();
     }
 }

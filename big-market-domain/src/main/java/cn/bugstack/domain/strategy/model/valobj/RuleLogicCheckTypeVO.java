@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * @Author: chs
- * @Description: 规则过滤校验类型值对象
- * @CreateTime: 2024-07-07
+ * Author: chs
+ * Description: 规则过滤校验类型值对象
+ * CreateTime: 2024-07-07
  */
 @Getter
 @AllArgsConstructor

@@ -45,7 +45,7 @@ public class RuleBlackListLogicFilter implements ILogicFilter<RuleActionEntity.R
         String[] blackUserIds = splitRuleValue[1].split(Constants.SPLIT);
         // 判断当前用户是否在黑名单用户id列表中
         for(String userBlackId:blackUserIds){
-            // 如果用户id存在于黑名单中，返回对应规则动作（黑名单规则过滤）
+            // 如果用户id存在于黑名单中，返回对应规则动作（拦截）
             if(userId.equals(userBlackId)){
                 return RuleActionEntity.<RuleActionEntity.RaffleBeforeEntity>builder()
                         .ruleModel(DefaultLogicFactory.LogicModel.RULE_BLACKLIST.getCode())

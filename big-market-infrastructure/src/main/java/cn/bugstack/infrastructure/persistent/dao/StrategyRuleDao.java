@@ -3,6 +3,7 @@ package cn.bugstack.infrastructure.persistent.dao;
 import cn.bugstack.infrastructure.persistent.po.Strategy;
 import cn.bugstack.infrastructure.persistent.po.StrategyRule;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -24,12 +25,12 @@ public interface StrategyRuleDao {
      * 根据策略id和规则模型查询策略规则
      * @return
      */
-    StrategyRule queryStrategyRule(Long strategyId, String ruleModel);
+    StrategyRule queryStrategyRule(@Param("strategyId") Long strategyId,@Param("ruleModel") String ruleModel);
 
     /**
      * 查询规则值
      * @return
      */
-    String queryStrategyRuleValue(Long strategyId,Integer awardId, String ruleModel);
+    String queryStrategyRuleValue(@Param("strategyId") Long strategyId,@Param("awardId") Integer awardId,@Param("ruleModel") String ruleModel);
 
 }
