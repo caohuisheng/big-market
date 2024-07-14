@@ -3,6 +3,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 big-market-app/data/**
+big-market-app/src/test/**
 
 ### IntelliJ IDEA ###
 .idea/**
