@@ -1,12 +1,10 @@
 package cn.bugstack.domain.strategy.model.valobj;
 
-import cn.bugstack.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import cn.bugstack.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import cn.bugstack.types.common.Constants;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.Arrays;
 
 /**
@@ -28,7 +26,7 @@ public class StrategyAwardRuleModelVO {
         if(ruleModels == null) return null;
         String[] ruleModelArr = ruleModels.split(Constants.SPLIT);
         return Arrays.stream(ruleModelArr)
-                .filter(ruleModel -> DefaultLogicFactory.LogicModel.isCenter(ruleModel))
+                .filter(ruleModel -> !ruleModel.equals("rule_random") && DefaultLogicFactory.LogicModel.isCenter(ruleModel))
                 .toArray(String[]::new);
     }
 

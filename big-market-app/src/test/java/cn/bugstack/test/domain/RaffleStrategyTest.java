@@ -4,13 +4,10 @@ import cn.bugstack.domain.strategy.model.entity.RaffleAwardEntity;
 import cn.bugstack.domain.strategy.model.entity.RaffleFactorEntity;
 import cn.bugstack.domain.strategy.service.IRaffleStrategy;
 import cn.bugstack.domain.strategy.service.armory.IStrategyArmory;
-import cn.bugstack.domain.strategy.service.rule.impl.RuleLockLogicFilter;
-import cn.bugstack.domain.strategy.service.rule.impl.RuleWeightLogicFilter;
-import cn.bugstack.infrastructure.persistent.dao.StrategyDao;
+import cn.bugstack.domain.strategy.service.rule.filter.impl.RuleLockLogicFilter;
+import cn.bugstack.domain.strategy.service.rule.filter.impl.RuleWeightLogicFilter;
 import cn.bugstack.infrastructure.persistent.dao.StrategyRuleDao;
-import cn.bugstack.infrastructure.persistent.po.StrategyRule;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson2.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +17,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * @Author: chs
@@ -53,12 +49,7 @@ public class RaffleStrategyTest {
         log.info("测试结果：{}",strategyArmory.assembleLotteryStrategy(100003L));
         //通过反射mock规则中的值
         ReflectionTestUtils.setField(ruleWeightLogicFilter, "userScore",40500L);
-        ReflectionTestUtils.setField(ruleLockLogicFilter,"userRaffleCount",0L);
-    }
-
-    @Test
-    public void test1(){
-
+        ReflectionTestUtils.setField(ruleLockLogicFilter,"userRaffleCount",1L);
     }
 
     @Test
@@ -96,15 +87,5 @@ public class RaffleStrategyTest {
 
         log.info("请求参数：{}", JSON.toJSONString(raffleFactorEntity));
         log.info("测试结果：{}", JSON.toJSONString(raffleAwardEntity));
-    }
-
-    @Test
-    public void test(){
-        List<StrategyRule> strategyRules = strategyRuleDao.queryStrategyRuleList();
-        log.info("strategyRules:{}",strategyRules);
-        StrategyRule strategyRule = strategyRuleDao.queryStrategyRule(100001L, "rule_weight");
-        log.info("strategyRule:{}",strategyRule);
-        String ruleValue = strategyRuleDao.queryStrategyRuleValue(100001L, null, "rule_weight");
-        log.info("ruleValue:{}",ruleValue);
     }
 }

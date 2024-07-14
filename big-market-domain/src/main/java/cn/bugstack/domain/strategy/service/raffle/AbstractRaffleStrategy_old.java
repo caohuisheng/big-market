@@ -9,7 +9,7 @@ import cn.bugstack.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
 import cn.bugstack.domain.strategy.service.IRaffleStrategy;
 import cn.bugstack.domain.strategy.service.armory.IStrategyDispatch;
-import cn.bugstack.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import cn.bugstack.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import cn.bugstack.types.enums.ResponseCode;
 import cn.bugstack.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +23,14 @@ import javax.annotation.Resource;
  * @CreateTime: 2024-07-07
  */
 @Slf4j
-public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
+public abstract class AbstractRaffleStrategy_old implements IRaffleStrategy {
 
     @Resource
     private IStrategyRepository repository;
     @Resource
     private IStrategyDispatch strategyDispatch;
 
-    public AbstractRaffleStrategy(IStrategyRepository repository,IStrategyDispatch strategyDispatch){
+    public AbstractRaffleStrategy_old(IStrategyRepository repository, IStrategyDispatch strategyDispatch){
         this.repository = repository;
         this.strategyDispatch = strategyDispatch;
     }
@@ -69,7 +69,7 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
         // 3.抽奖前执行规则过滤
         RuleActionEntity<RuleActionEntity.RaffleBeforeEntity> ruleActionEntity = this.doCheckRaffleBeforeLogic(
                 raffleFactorEntity, strategyEntity.getRuleModelArr());
-        /* 判断规则动作实体的code是否为TAKE_OVER(接管) */
+        /* 判断规则动作实体的code是否为TAKE_OVER(拦截) */
         if(RuleLogicCheckTypeVO.TAKE_OVER.getCode().equals(ruleActionEntity.getCode())){
             String ruleModel = ruleActionEntity.getRuleModel();
             if(DefaultLogicFactory.LogicModel.RULE_BLACKLIST.getCode().equals(ruleModel)){
@@ -78,7 +78,7 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
                         .awardId(ruleActionEntity.getData().getAwardId())
                         .build();
             }else if(DefaultLogicFactory.LogicModel.RULE_WEIGHT.getCode().equals(ruleModel)){
-                //若为权重规则，根据返回的信息进行抽奖
+                //若为权重规则，根据返回的ruleWeightValue进行抽奖
                 RuleActionEntity.RaffleBeforeEntity raffleBeforeEntity = ruleActionEntity.getData();
                 String ruleWeightValue = raffleBeforeEntity.getRuleWeightValue();
                 Integer randomAwardId = strategyDispatch.getRandomAwardId(strategyId, ruleWeightValue);
@@ -91,10 +91,11 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
         // 4.默认抽奖流程
         Integer randomAwardId = strategyDispatch.getRandomAwardId(strategyId);
 
-        // 5.查询规则模型
-        StrategyAwardRuleModelVO strategyAwardRuleModelVO = repository.queryStrategyAwardRuleModels(strategyId, awardId);
+        // 5.查询奖品规则[抽奖中（拿到奖品id时，过滤规则）、抽奖后（扣减万奖品库存后过滤，抽奖中拦截和无库存则走兜底）]
+        StrategyAwardRuleModelVO strategyAwardRuleModelVO = repository.queryStrategyAwardRuleModels(strategyId, randomAwardId);
 
-        // 6.规则过滤 - 抽奖中
+        // 6.抽奖中 - 规则过滤
+        raffleFactorEntity.setAwardId(randomAwardId);
         RuleActionEntity<RuleActionEntity.RaffleCenterEntity> centerRuleActionEntity = this.doCheckRaffleCenterLogic(
                 raffleFactorEntity, strategyAwardRuleModelVO.raffleCenterRuleModelList());
 

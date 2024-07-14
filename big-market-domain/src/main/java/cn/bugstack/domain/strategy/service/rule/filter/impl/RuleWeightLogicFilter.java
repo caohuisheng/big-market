@@ -1,15 +1,13 @@
-package cn.bugstack.domain.strategy.service.rule.impl;
+package cn.bugstack.domain.strategy.service.rule.filter.impl;
 
 import cn.bugstack.domain.strategy.model.entity.RuleActionEntity;
 import cn.bugstack.domain.strategy.model.entity.RuleMatterEntity;
 import cn.bugstack.domain.strategy.model.valobj.RuleLogicCheckTypeVO;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
 import cn.bugstack.domain.strategy.service.annotation.LogicStrategy;
-import cn.bugstack.domain.strategy.service.rule.ILogicFilter;
-import cn.bugstack.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import cn.bugstack.domain.strategy.service.rule.filter.ILogicFilter;
+import cn.bugstack.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import cn.bugstack.types.common.Constants;
-import com.sun.deploy.security.ruleset.RuleAction;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -23,7 +21,7 @@ import java.util.*;
  * @CreateTime: 2024-07-07
  */
 @Slf4j
-@Component
+//@Component
 @LogicStrategy(logicModel = DefaultLogicFactory.LogicModel.RULE_WEIGHT)
 public class RuleWeightLogicFilter implements ILogicFilter<RuleActionEntity.RaffleBeforeEntity> {
 
@@ -56,11 +54,10 @@ public class RuleWeightLogicFilter implements ILogicFilter<RuleActionEntity.Raff
 
         //2.获取所有的积分阈值
         List<Long> scores = new ArrayList<>(scoreToAwards.keySet());
-        Collections.sort(scores);
-        //找到第一个大于用户当前积分的积分阈值
+        //找到最后一个小于用户当前积分的积分阈值
         Long targetScore = scores.stream()
                 .filter(score -> userScore >= score)
-                .findFirst()
+                .max(Long::compareTo)
                 .orElse(null);
 
         //3.执行权重规则过滤
@@ -104,7 +101,6 @@ public class RuleWeightLogicFilter implements ILogicFilter<RuleActionEntity.Raff
             if(parts.length != 2){
                 throw new IllegalArgumentException("invalid ruleValue:"+ruleValue);
             }
-            // 将
             scoreToAwards.put(Long.parseLong(parts[0]),scoreToAwardsStr);
         }
         return scoreToAwards;

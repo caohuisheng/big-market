@@ -46,7 +46,7 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
             throw new AppException(ResponseCode.STRATEGY_RULE_WEIGHT_IS_NULL.getCode(), ResponseCode.STRATEGY_RULE_WEIGHT_IS_NULL.getInfo());
         }
 
-        // 获取积分阈值-奖品列表映射
+        // 获取积分阈值-积分阈值to奖品列表映射
         Map<String, List<Integer>> scoreToAwards = strategyRuleEntity.getScoreToAwards();
         // 遍历每个积分阈值，执行权重规则配置
         for(String score: scoreToAwards.keySet()){

@@ -24,7 +24,7 @@
         select * from strategy_award where strategy_id = #{strategy_id}
     </select>
 
-    <select id="queryStrategyAwardRuleModels" resultMap="DataMap">
+    <select id="queryStrategyAwardRuleModels" resultType="java.lang.String">
         select rule_models from strategy_award where strategy_id = #{strategyId} and award_id = #{awardId}
     </select>
 
