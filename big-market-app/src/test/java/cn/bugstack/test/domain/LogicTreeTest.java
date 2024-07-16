@@ -34,7 +34,7 @@ public class LogicTreeTest {
     @Test
     public void test_tree_rule(){
         // 构建参数
-        int treeId = 1000000001;
+        String treeId = "1000000001";
         RuleTreeNodeLineVO nodeLine1 = RuleTreeNodeLineVO.builder()
                 .treeId(treeId)
                 .ruleNodeFrom("rule_lock")
@@ -96,7 +96,7 @@ public class LogicTreeTest {
         }});
 
         IDecisionTreeEngine treeEngine = defaultTreeFactory.openLogicTree(ruleTreeVO);
-        DefaultTreeFactory.StrategyAwardData data = treeEngine.process("chs", 100001L, 100);
+        DefaultTreeFactory.StrategyAwardVO data = treeEngine.process("chs", 100001L, 100);
         log.info("测试结果：{}", JSON.toJSONString(data));
     }
 }

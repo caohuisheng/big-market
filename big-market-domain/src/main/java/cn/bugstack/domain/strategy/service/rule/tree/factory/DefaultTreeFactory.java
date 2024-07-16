@@ -18,13 +18,18 @@ import java.util.Map;
  */
 @Service
 public class DefaultTreeFactory {
-
+    // 节点名-节点映射
     private final Map<String, ILogicTreeNode> logicTreeNodeGroup;
 
     public DefaultTreeFactory(Map<String, ILogicTreeNode> logicTreeNodeGroup){
         this.logicTreeNodeGroup = logicTreeNodeGroup;
     }
 
+    /**
+     * 获取决策树引擎
+     * @param ruleTreeVO
+     * @return
+     */
     public IDecisionTreeEngine openLogicTree(RuleTreeVO ruleTreeVO){
         return new DecisionTreeEngine(logicTreeNodeGroup, ruleTreeVO);
     }
@@ -33,12 +38,12 @@ public class DefaultTreeFactory {
     @Builder
     public static class TreeActionEntity{
         private RuleLogicCheckTypeVO ruleLogicCheckTypeVO;
-        private StrategyAwardData strategyAwardData;
+        private StrategyAwardVO strategyAwardData;
     }
 
     @Data
     @Builder
-    public static class StrategyAwardData{
+    public static class StrategyAwardVO{
         // 抽奖奖品id
         private Integer awardId;
         // 抽奖奖品规则

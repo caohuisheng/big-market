@@ -3,6 +3,7 @@ package cn.bugstack.domain.strategy.repository;
 import cn.bugstack.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyRuleEntity;
+import cn.bugstack.domain.strategy.model.valobj.RuleTreeVO;
 import cn.bugstack.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 
@@ -37,4 +38,6 @@ public interface IStrategyRepository {
     String queryStrategyRuleValue(Long strategyId, String ruleModel);
 
     StrategyAwardRuleModelVO queryStrategyAwardRuleModels(Long StrategyId, Integer awardId);
+
+    RuleTreeVO queryRuleTreeVOByTreeId(String treeId);
 }

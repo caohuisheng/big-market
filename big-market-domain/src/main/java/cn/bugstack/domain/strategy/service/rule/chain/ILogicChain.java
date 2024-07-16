@@ -1,5 +1,8 @@
 package cn.bugstack.domain.strategy.service.rule.chain;
 
+import cn.bugstack.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
+import cn.bugstack.domain.strategy.service.rule.tree.factory.DefaultTreeFactory;
+
 /**
  * Author: chs
  * Description: 抽奖策略规则责任链接口
@@ -13,5 +16,5 @@ public interface ILogicChain extends ILogicChainArmory {
      * @param strategyId 策略id
      * @return 奖品id
      */
-    Integer logic(String userId, Long strategyId);
+    DefaultChainFactory.StrategyAwardVO logic(String userId, Long strategyId);
 }

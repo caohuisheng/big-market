@@ -3,14 +3,13 @@ package cn.bugstack.infrastructure.persistent.repository;
 import cn.bugstack.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyRuleEntity;
+import cn.bugstack.domain.strategy.model.valobj.RuleTreeNodeLineVO;
+import cn.bugstack.domain.strategy.model.valobj.RuleTreeNodeVO;
+import cn.bugstack.domain.strategy.model.valobj.RuleTreeVO;
 import cn.bugstack.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
-import cn.bugstack.infrastructure.persistent.dao.StrategyAwardDao;
-import cn.bugstack.infrastructure.persistent.dao.StrategyDao;
-import cn.bugstack.infrastructure.persistent.dao.StrategyRuleDao;
-import cn.bugstack.infrastructure.persistent.po.Strategy;
-import cn.bugstack.infrastructure.persistent.po.StrategyAward;
-import cn.bugstack.infrastructure.persistent.po.StrategyRule;
+import cn.bugstack.infrastructure.persistent.dao.*;
+import cn.bugstack.infrastructure.persistent.po.*;
 import cn.bugstack.infrastructure.persistent.redis.IRedisService;
 import cn.bugstack.types.common.Constants;
 import io.jsonwebtoken.lang.Collections;
@@ -21,6 +20,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
 import javax.annotation.Resources;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,6 +42,12 @@ public class StrategyRepository implements IStrategyRepository {
     private StrategyDao strategyDao;
     @Resource
     private StrategyRuleDao strategyRuleDao;
+    @Resource
+    private RuleTreeDao ruleTreeDao;
+    @Resource
+    private RuleTreeNodeDao ruleTreeNodeDao;
+    @Resource
+    private RuleTreeNodeLineDao ruleTreeNodeLineDao;
 
     @Override
     public List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId) {
@@ -135,4 +142,49 @@ public class StrategyRepository implements IStrategyRepository {
                 .ruleModels(ruleModels)
                 .build();
     }
+
+    @Override
+    public RuleTreeVO queryRuleTreeVOByTreeId(String treeId) {
+        //从缓存中查询
+        String cacheKey = Constants.RedisKey.RULE_TREE_VO_KEY + treeId;
+        RuleTreeVO ruleTreeVOCache = redisService.getValue(cacheKey);
+        if(ruleTreeVOCache != null){
+            return ruleTreeVOCache;
+        }
+
+        // 从数据库中查询
+        RuleTree ruleTree = ruleTreeDao.queryRuleTreeByTreeId(treeId);
+        List<RuleTreeNode> ruleTreeNodes = ruleTreeNodeDao.queryRuleTreeNodeList(treeId);
+        List<RuleTreeNodeLine> ruleTreeNodeLines = ruleTreeNodeLineDao.queryRuleTreeNodeLineList(treeId);
+
+        // 将node_line转换为map结构（节点名 - 所有以对应节点为起点的连线列表）
+        Map<String, List<RuleTreeNodeLineVO>> ruleTreeNodeLineMap = new HashMap<>();
+        ruleTreeNodeLines.forEach(line -> {
+            RuleTreeNodeLineVO ruleTreeNodeLineVO = new RuleTreeNodeLineVO();
+            BeanUtils.copyProperties(line, ruleTreeNodeLineVO);
+            // 获取与当前连线起点相同的连线列表，并将当前连线加入到列表中
+            List<RuleTreeNodeLineVO> ruleTreeNodeLineVOList = ruleTreeNodeLineMap
+                    .computeIfAbsent(line.getRuleNodeFrom(), k -> new ArrayList<>());
+            ruleTreeNodeLineVOList.add(ruleTreeNodeLineVO);
+        });
+
+        // 将node转换为map结构（节点名 - 节点对象）
+        Map<String, RuleTreeNodeVO> treeNodeVOMap = new HashMap<>();
+        ruleTreeNodes.forEach(node -> {
+            RuleTreeNodeVO ruleTreeNodeVO = new RuleTreeNodeVO();
+            BeanUtils.copyProperties(node, ruleTreeNodeVO);
+            ruleTreeNodeVO.setTreeNodeLineVOList(ruleTreeNodeLineMap.get(node.getRuleKey()));
+            treeNodeVOMap.put(node.getRuleKey(), ruleTreeNodeVO);
+        });
+
+        // 创建ruleTree对象
+        RuleTreeVO ruleTreeVO = new RuleTreeVO();
+        BeanUtils.copyProperties(ruleTree, ruleTreeVO);
+        ruleTreeVO.setTreeNodeMap(treeNodeVOMap);
+        // 将结果保存到缓存中
+        redisService.setValue(cacheKey, ruleTreeVOCache);
+
+        return ruleTreeVO;
+    }
+
 }

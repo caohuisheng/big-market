@@ -3,6 +3,10 @@ package cn.bugstack.domain.strategy.service.rule.chain.factory;
 import cn.bugstack.domain.strategy.model.entity.StrategyEntity;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
 import cn.bugstack.domain.strategy.service.rule.chain.ILogicChain;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -50,5 +54,24 @@ public class DefaultChainFactory {
 
         // 返回责任链头节点
         return logicChain;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class StrategyAwardVO{
+        private Integer awardId;
+        private String logicModel;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static enum LogicModel{
+        RULE_BLACKLIST("rule_blacklist","黑名单规则"),
+        RULE_WEIGHT("rule_weight","权重规则"),
+        RULE_DEFAULT("rule_default","默认规则"),
+        ;
+
+        private String code;
+        private String info;
     }
 }

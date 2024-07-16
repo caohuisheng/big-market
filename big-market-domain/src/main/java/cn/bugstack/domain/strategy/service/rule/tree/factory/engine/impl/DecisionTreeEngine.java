@@ -19,7 +19,7 @@ import java.util.Map;
  */
 @Slf4j
 public class DecisionTreeEngine implements IDecisionTreeEngine {
-
+    // 责任节点名-节点映射
     private final Map<String, ILogicTreeNode> logicTreeNodeMap;
 
     private RuleTreeVO ruleTreeVO;
@@ -30,14 +30,15 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
     }
 
     @Override
-    public DefaultTreeFactory.StrategyAwardData process(String userId, Long strategyId, Integer awardId) {
-        DefaultTreeFactory.StrategyAwardData strategyAwardData = null;
+    public DefaultTreeFactory.StrategyAwardVO process(String userId, Long strategyId, Integer awardId) {
+        DefaultTreeFactory.StrategyAwardVO strategyAwardData = null;
 
-        // 获取基础信息
+        // 获取决策树根节点名
         String nextNode = ruleTreeVO.getTreeRootRuleNode();
+        // 树节点名-节点映射
         Map<String, RuleTreeNodeVO> treeNodeMap = ruleTreeVO.getTreeNodeMap();
 
-        // 获取起始节点[根节点记录了第一个要执行的规则]
+        // 获取根节点[根节点记录了第一个要执行的规则]
         RuleTreeNodeVO ruleTreeNode = treeNodeMap.get(nextNode);
         while(null != nextNode){
             // 获取决策节点
@@ -59,6 +60,12 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
         return strategyAwardData;
     }
 
+    /**
+     * 获取决策的下一个节点
+     * @param matterValue
+     * @param treeNodeLineVOList
+     * @return
+     */
     public String nextNode(String matterValue, List<RuleTreeNodeLineVO> treeNodeLineVOList){
         if(null == treeNodeLineVOList || treeNodeLineVOList.isEmpty()) return null;
         for(RuleTreeNodeLineVO nodeLine:treeNodeLineVOList){
