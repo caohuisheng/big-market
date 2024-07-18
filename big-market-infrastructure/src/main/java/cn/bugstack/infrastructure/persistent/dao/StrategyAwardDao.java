@@ -35,4 +35,6 @@ public interface StrategyAwardDao {
      * @return
      */
     String queryStrategyAwardRuleModels(@Param("strategyId") Long  strategyId,@Param("awardId") Integer awardId);
+
+    void updateStrategyAwardStock(@Param("strategyId") Long strategyId,@Param("awardId") Integer awardId);
 }

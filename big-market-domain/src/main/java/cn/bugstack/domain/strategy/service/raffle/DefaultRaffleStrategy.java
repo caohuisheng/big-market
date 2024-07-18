@@ -2,6 +2,7 @@ package cn.bugstack.domain.strategy.service.raffle;
 
 import cn.bugstack.domain.strategy.model.valobj.RuleTreeVO;
 import cn.bugstack.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
+import cn.bugstack.domain.strategy.model.valobj.StrategyAwardStockKeyVO;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
 import cn.bugstack.domain.strategy.service.AbstractRaffleStrategy;
 import cn.bugstack.domain.strategy.service.armory.IStrategyDispatch;
@@ -43,6 +44,8 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
         }
 
         // 获取规则模型（树节点）
+        // rule_lock-->rule_stock(allow)-->rule_luck_award(take_over)
+        //          -->rule_luck_award(take_over)
         String ruleModels = strategyAwardRuleModelVO.getRuleModels();
         RuleTreeVO ruleTreeVO = repository.queryRuleTreeVOByTreeId(ruleModels);
         if(null == ruleTreeVO){
@@ -53,4 +56,15 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
         IDecisionTreeEngine decisionTreeEngine = defaultTreeFactory.openLogicTree(ruleTreeVO);
         return decisionTreeEngine.process(userId, strategyId, awardId);
     }
+
+    @Override
+    public StrategyAwardStockKeyVO takeQueueValue() throws InterruptedException {
+        return repository.takeQueueValue();
+    }
+
+    @Override
+    public void updateStrategyAwardStock(Long strategyId, Integer awardId) {
+        repository.updateStrategyAwardStock(strategyId, awardId);
+    }
+
 }

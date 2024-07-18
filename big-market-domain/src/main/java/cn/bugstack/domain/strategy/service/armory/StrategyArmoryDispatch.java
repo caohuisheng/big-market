@@ -7,6 +7,7 @@ import cn.bugstack.domain.strategy.repository.IStrategyRepository;
 import cn.bugstack.types.common.Constants;
 import cn.bugstack.types.enums.ResponseCode;
 import cn.bugstack.types.exception.AppException;
+import com.sun.org.apache.bcel.internal.classfile.ConstantString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,13 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
         // 查询策略配置
         List<StrategyAwardEntity> strategyAwardEntities = repository.queryStrategyAwardList(strategyId);
         assembleLotteryStrategy(String.valueOf(strategyId),strategyAwardEntities);
+
+        // 缓存奖品库存
+        for(StrategyAwardEntity entity:strategyAwardEntities){
+            Integer awardId = entity.getAwardId();
+            Integer awardCount = entity.getAwardCount();
+            cacheStrategyAwardCount(strategyId, awardId, awardCount);
+        }
 
         // 权重策略配置 - 适用于rule_weight权重规则配置
         StrategyEntity strategyEntity = repository.queryStrategyEntityByStrategyId(strategyId);
@@ -91,6 +99,12 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
         repository.storeStrategyAwardSearchRateTable(keySuffix,strategyAwardSearchRateTable.size(),shuffleStrategyAwardSearchRateTable);
     }
 
+    // 缓存奖品的剩余数量
+    private void cacheStrategyAwardCount(Long strategyId, Integer awardId, Integer count){
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_KEY + strategyId + Constants.UNDERLINE + awardId;
+        repository.cacheStrategyAwardCount(cacheKey, count);
+    }
+
     @Override
     public Integer getRandomAwardId(Long strategyId) {
         int rateRange = repository.getRateRange(strategyId);
@@ -102,5 +116,11 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
         String keySuffix = strategyId + "_" + ruleWeightValue;
         int rateRange = repository.getRateRange(keySuffix);
         return repository.getStrategyAwardAssemble(keySuffix, new SecureRandom().nextInt(rateRange));
+    }
+
+    @Override
+    public Boolean subtractionAwardStock(Long strategyId, Integer awardId) {
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_KEY + strategyId + Constants.UNDERLINE + awardId;
+        return repository.subtractionAwardStock(cacheKey);
     }
 }

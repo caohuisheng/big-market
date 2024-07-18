@@ -22,4 +22,5 @@ public class RuleTreeVO {
     private String treeRootRuleNode;
     // 规则树节点
     private Map<String, RuleTreeNodeVO> treeNodeMap;
+
 }

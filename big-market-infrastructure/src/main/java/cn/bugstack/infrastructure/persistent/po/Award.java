@@ -2,6 +2,9 @@ package cn.bugstack.infrastructure.persistent.po;
 
 import lombok.Data;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -27,5 +30,4 @@ public class Award {
     private Date createTime;
     //更新时间
     private Date updateTime;
-
 }

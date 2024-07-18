@@ -3,17 +3,17 @@ package cn.bugstack.infrastructure.persistent.repository;
 import cn.bugstack.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyRuleEntity;
-import cn.bugstack.domain.strategy.model.valobj.RuleTreeNodeLineVO;
-import cn.bugstack.domain.strategy.model.valobj.RuleTreeNodeVO;
-import cn.bugstack.domain.strategy.model.valobj.RuleTreeVO;
-import cn.bugstack.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
+import cn.bugstack.domain.strategy.model.valobj.*;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
 import cn.bugstack.infrastructure.persistent.dao.*;
 import cn.bugstack.infrastructure.persistent.po.*;
 import cn.bugstack.infrastructure.persistent.redis.IRedisService;
 import cn.bugstack.types.common.Constants;
 import io.jsonwebtoken.lang.Collections;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RBlockingQueue;
+import org.redisson.api.RDelayedQueue;
 import org.redisson.api.RMap;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Repository;
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
  * @Description: 策略服务仓储实现
  * @CreateTime: 2024-07-06
  */
+@Slf4j
 @Repository
 public class StrategyRepository implements IStrategyRepository {
 
@@ -185,6 +187,56 @@ public class StrategyRepository implements IStrategyRepository {
         redisService.setValue(cacheKey, ruleTreeVOCache);
 
         return ruleTreeVO;
+    }
+
+    @Override
+    public void cacheStrategyAwardCount(String cacheKey, Integer count) {
+        // 如果当前存在该key，就不保存了
+        if(redisService.isExists(cacheKey)){
+            return;
+        }
+        redisService.setAtomicLong(cacheKey, count);
+    }
+
+    @Override
+    public Boolean subtractionAwardStock(String cacheKey) {
+        // 扣减库存
+        long surplus = redisService.decr(cacheKey);
+        // 如果剩余库存小于0，设置库存值为0，并返回false
+        if(surplus < 0){
+            redisService.setValue(cacheKey, 0);
+            return false;
+        }
+
+        String lockKey = cacheKey + Constants.UNDERLINE + surplus;
+        Boolean success = redisService.setNx(lockKey);
+        if(success == false){
+            log.info("策略奖品库存加锁失败, lockKey:{}", lockKey);
+        }
+        return true;
+    }
+
+    @Override
+    public void awardStockConsumeSendQueue(StrategyAwardStockKeyVO strategyAwardStockKeyVO) {
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_QUERY_KEY;
+        RBlockingQueue<StrategyAwardStockKeyVO> blockingQueue = redisService.getBlockingQueue(cacheKey);
+        RDelayedQueue<StrategyAwardStockKeyVO> delayedQueue = redisService.getDelayedQueue(blockingQueue);
+        delayedQueue.offer(strategyAwardStockKeyVO, 3, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void updateStrategyAwardStock(Long strategyId, Integer awardId) {
+        StrategyAward strategyAward = new StrategyAward();
+        strategyAward.setStrategyId(strategyId);
+        strategyAward.setAwardId(awardId);
+        strategyAwardDao.updateStrategyAwardStock(strategyId, awardId);
+    }
+
+    @Override
+    public StrategyAwardStockKeyVO takeQueueValue() {
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_QUERY_KEY;
+        RBlockingQueue<StrategyAwardStockKeyVO> blockingQueue = redisService.getBlockingQueue(cacheKey);
+        return blockingQueue.poll();
     }
 
 }

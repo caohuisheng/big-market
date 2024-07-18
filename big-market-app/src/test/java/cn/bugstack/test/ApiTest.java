@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -38,8 +39,9 @@ public class ApiTest {
         log.info("测试结果：{}", JSON.toJSONString(awards));
     }
 
-    public static void main(String[] args) {
-        System.out.println("hello,world!");
+    @Test
+    public void testSchedule() throws InterruptedException{
+        System.out.println("begin");
+        new CountDownLatch(1).await();
     }
-
 }
