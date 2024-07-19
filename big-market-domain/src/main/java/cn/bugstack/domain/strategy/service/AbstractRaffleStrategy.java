@@ -30,7 +30,7 @@ import java.util.Map;
  * @CreateTime: 2024-07-07
  */
 @Slf4j
-public abstract class AbstractRaffleStrategy implements IRaffleStrategy, IRaffleStock {
+public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
 
     // 策略仓储服务
     protected IStrategyRepository repository;
