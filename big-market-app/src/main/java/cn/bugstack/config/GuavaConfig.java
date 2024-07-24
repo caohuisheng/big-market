@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.FileInputStream;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
