@@ -64,7 +64,7 @@ public class RaffleController implements IRaffleService {
     }
 
     @Override
-    @RequestMapping(value = "z", method = RequestMethod.POST)
+    @RequestMapping(value = "query_raffle_award_list", method = RequestMethod.POST)
     public Response<List<RaffleAwardListResponseDTO>> queryRaffleAwardList(@RequestBody RaffleAwardListRequestDTO requestDTO) {
         Long strategyId = requestDTO.getStrategyId();
         try {

@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class RaffleAwardListResponseDTO {
 
     // 奖品id
-    private String awardId;
+    private Integer awardId;
     // 奖品标题
     private String awardTitle;
     // 奖品副标题
