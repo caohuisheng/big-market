@@ -1,21 +1,23 @@
-package cn.bugstack.infrastructure.persistent.po;
+package cn.bugstack.domain.activity.model.entity;
 
+import cn.bugstack.domain.activity.model.valobj.ActivityStateVO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 /**
- * 抽奖活动表
+ * Author: chs
+ * Description: 活动实体对象
+ * CreateTime: 2024-07-28
  */
 @Data
-public class RaffleActivity implements Serializable {
-
-    /**
-     * 自增ID
-     */
-    private Long id;
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ActivityEntity {
 
     /**
      * 活动ID
@@ -35,12 +37,12 @@ public class RaffleActivity implements Serializable {
     /**
      * 开始时间
      */
-    private Date beginDateTime;
+    private LocalDateTime beginDateTime;
 
     /**
      * 结束时间
      */
-    private Date endDateTime;
+    private LocalDateTime endDateTime;
 
     /**
      * 库存总量
@@ -65,15 +67,5 @@ public class RaffleActivity implements Serializable {
     /**
      * 活动状态
      */
-    private String state;
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
+    private ActivityStateVO state;
 }

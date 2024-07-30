@@ -1,21 +1,24 @@
-package cn.bugstack.infrastructure.persistent.po;
+package cn.bugstack.domain.activity.model.entity;
 
+import cn.bugstack.domain.activity.model.valobj.OrderStateVO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
- * 抽奖活动单
+ * Author: chs
+ * Description: 活动订单实体对象
+ * CreateTime: 2024-07-28
  */
 @Data
-public class RaffleActivityOrder implements Serializable {
-
-    /**
-     * 自增ID
-     */
-    private Long id;
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ActivityOrderEntity {
 
     /**
      * 用户ID
@@ -70,21 +73,10 @@ public class RaffleActivityOrder implements Serializable {
     /**
      * 订单状态
      */
-    private String state;
+    private OrderStateVO state;
 
     /**
      * 业务仿重ID - 外部透传的，确保幂等
      */
     private String outBusinessNo;
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
-
 }
