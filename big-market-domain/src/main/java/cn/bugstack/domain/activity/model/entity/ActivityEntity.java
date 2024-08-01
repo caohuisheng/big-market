@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * Author: chs
@@ -37,22 +38,12 @@ public class ActivityEntity {
     /**
      * 开始时间
      */
-    private LocalDateTime beginDateTime;
+    private Date beginDateTime;
 
     /**
      * 结束时间
      */
-    private LocalDateTime endDateTime;
-
-    /**
-     * 库存总量
-     */
-    private Integer stockCount;
-
-    /**
-     * 剩余库存
-     */
-    private Integer stockCountSurplus;
+    private Date endDateTime;
 
     /**
      * 活动参与次数配置

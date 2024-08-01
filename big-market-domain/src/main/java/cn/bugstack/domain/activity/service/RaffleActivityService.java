@@ -26,10 +26,11 @@ public class RaffleActivityService extends AbstractRaffleActivity {
     @Override
     protected CreateOrderAggregate buildOrderAggregate(SkuRechargeEntity skuRechargeEntity, ActivitySkuEntity activitySkuEntity,
                                                        ActivityEntity activityEntity, ActivityCountEntity activityCountEntity) {
+        String userId = skuRechargeEntity.getUserId();
         // 订单实体对象
         ActivityOrderEntity activityOrderEntity = new ActivityOrderEntity();
-        activityOrderEntity.setUserId(skuRechargeEntity.getUserId());
-        activityOrderEntity.setSku(skuRechargeEntity.getSku());
+        activityOrderEntity.setUserId(userId);
+        activityOrderEntity.setSku(activitySkuEntity.getSku());
         activityOrderEntity.setActivityId(activityEntity.getActivityId());
         activityOrderEntity.setActivityName(activityEntity.getActivityName());
         activityOrderEntity.setStrategyId(activityEntity.getStrategyId());
@@ -44,7 +45,7 @@ public class RaffleActivityService extends AbstractRaffleActivity {
 
         //构建聚合对象
         return CreateOrderAggregate.builder()
-                .userId(skuRechargeEntity.getUserId())
+                .userId(userId)
                 .activityId(activitySkuEntity.getActivityId())
                 .totalCount(activityCountEntity.getTotalCount())
                 .dayCount(activityCountEntity.getDayCount())

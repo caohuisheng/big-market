@@ -1,11 +1,14 @@
 package cn.bugstack.infrastructure.persistent.repository;
 
+import cn.bugstack.domain.activity.event.ActivitySkuStockZeroMessageEvent;
 import cn.bugstack.domain.activity.model.aggregate.CreateOrderAggregate;
 import cn.bugstack.domain.activity.model.entity.ActivityCountEntity;
 import cn.bugstack.domain.activity.model.entity.ActivityEntity;
 import cn.bugstack.domain.activity.model.entity.ActivityOrderEntity;
 import cn.bugstack.domain.activity.model.entity.ActivitySkuEntity;
+import cn.bugstack.domain.activity.model.valobj.ActivityStateVO;
 import cn.bugstack.domain.activity.repository.IActivityRepository;
+import cn.bugstack.infrastructure.event.EventPublisher;
 import cn.bugstack.infrastructure.persistent.dao.*;
 import cn.bugstack.infrastructure.persistent.po.*;
 import cn.bugstack.infrastructure.persistent.redis.IRedisService;
@@ -20,6 +23,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Author: chs
@@ -35,6 +40,9 @@ public class ActivityRepository implements IActivityRepository {
     @Resource
     private IDBRouterStrategy dbRouter;
     @Resource
+    private EventPublisher eventPublisher;
+
+    @Resource
     private TransactionTemplate transactionTemplate;
     @Resource
     private RaffleActivitySkuDao raffleActivitySkuDao;
@@ -46,6 +54,8 @@ public class ActivityRepository implements IActivityRepository {
     private RaffleActivityOrderDao raffleActivityOrderDao;
     @Resource
     private RaffleActivityAccountDao raffleActivityAccountDao;
+    @Resource
+    private ActivitySkuStockZeroMessageEvent activitySkuStockZeroMessageEvent;
 
     @Override
     public ActivitySkuEntity queryActivitySku(Long sku) {
@@ -67,6 +77,7 @@ public class ActivityRepository implements IActivityRepository {
         RaffleActivity raffleActivity = raffleActivityDao.queryRaffleActivityById(activityId);
         activityEntity = new ActivityEntity();
         BeanUtils.copyProperties(raffleActivity, activityEntity);
+        activityEntity.setState(ActivityStateVO.valueOf(raffleActivity.getState()));
         redisService.setValue(cacheKey, activityEntity);
 
         return activityEntity;
@@ -125,8 +136,8 @@ public class ActivityRepository implements IActivityRepository {
                     return 1;
                 } catch (Exception e) {
                     status.setRollbackOnly();
-                    log.error("写入订单记录，唯一索引冲突 userId:{} activityId:{} sku:{}", activityOrderEntity.getUserId(),
-                            activityOrderEntity.getActivityId(), activityOrderEntity.getSku());
+                    log.error("写入订单记录，唯一索引冲突 userId:{} activityId:{} sku:{} error:{}", activityOrderEntity.getUserId(),
+                            activityOrderEntity.getActivityId(), activityOrderEntity.getSku(),e.getMessage());
                     throw new AppException(ResponseCode.INDEX_DUP.getCode());
                 }
             });
@@ -134,4 +145,36 @@ public class ActivityRepository implements IActivityRepository {
             dbRouter.clear();
         }
     }
+
+    @Override
+    public void cacheActivitySkuStockCount(String cacheKey, Integer stockCount) {
+        if(redisService.isExists(cacheKey)){
+            return;
+        }
+        redisService.setAtomicLong(cacheKey, stockCount);
+    }
+
+    @Override
+    public boolean subtractionActivitySkuStock(Long sku, String cacheKey, Date endDate) {
+        //尝试扣减活动sku库存
+        long surplus = redisService.decr(cacheKey);
+        if(surplus == 0){
+            //库存消耗完后，发送消息，通知更新数据库库存
+            eventPublisher.publish(activitySkuStockZeroMessageEvent.topic(), activitySkuStockZeroMessageEvent.buildEventMessage(sku));
+            return false;
+        }else if(surplus < 0){
+            //库存小于0，恢复为0
+            redisService.setAtomicLong(cacheKey, 0);
+            return false;
+        }
+
+        //加锁为了兜底，如果厚度恢复库存、手动处理等，也不会超卖，因为所有可用库存key都被加锁
+        //设置加锁时间为活动截止时间+延迟1天
+        String lockKey = cacheKey + Constants.UNDERLINE + surplus;
+        long expireMills = endDate.getTime() - System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
+        Boolean status = redisService.setNx(lockKey, expireMills, TimeUnit.MILLISECONDS);
+
+        return status;
+    }
+
 }

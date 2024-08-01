@@ -34,7 +34,7 @@ public abstract class AbstractRaffleActivity extends RaffleActivitySupport imple
         }
 
         //2.查询基础信息
-        //2.1 通过sku查询活动信息
+        //2.1 通过sku查询活动sku信息
         ActivitySkuEntity activitySkuEntity = queryActivitySku(sku);
         //2.2 查询活动信息
         ActivityEntity activityEntity = queryRaffleActivityById(activitySkuEntity.getActivityId());

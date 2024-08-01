@@ -5,6 +5,8 @@ import cn.bugstack.domain.activity.model.entity.ActivityCountEntity;
 import cn.bugstack.domain.activity.model.entity.ActivityEntity;
 import cn.bugstack.domain.activity.model.entity.ActivitySkuEntity;
 
+import java.util.Date;
+
 /**
  * Author: chs
  * Description: 活动仓储接口
@@ -18,4 +20,8 @@ public interface IActivityRepository {
     ActivityCountEntity queryRaffleActivityCountById(Long activityCountId);
 
     void doSaveOrder(CreateOrderAggregate createOrderAggregate);
+
+    boolean subtractionActivitySkuStock(Long sku, String cacheKey, Date endDate);
+
+    void cacheActivitySkuStockCount(String cacheKey, Integer stockCount);
 }
