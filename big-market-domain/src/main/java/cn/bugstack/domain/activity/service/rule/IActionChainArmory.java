@@ -2,7 +2,7 @@ package cn.bugstack.domain.activity.service.rule;
 
 /**
  * Author: chs
- * Description:
+ * Description: 活动责任链装配
  * CreateTime: 2024-07-28
  */
 public interface IActionChainArmory {

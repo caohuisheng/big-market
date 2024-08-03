@@ -7,6 +7,6 @@ package cn.bugstack.domain.activity.armory;
  */
 public interface IActivityArmory {
 
-    void assembleActivitySku(Long sku);
+    boolean assembleActivitySku(Long sku);
 
 }

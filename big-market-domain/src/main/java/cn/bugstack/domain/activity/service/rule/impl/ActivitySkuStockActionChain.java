@@ -4,6 +4,7 @@ import cn.bugstack.domain.activity.armory.IActivityDispatch;
 import cn.bugstack.domain.activity.model.entity.ActivityCountEntity;
 import cn.bugstack.domain.activity.model.entity.ActivityEntity;
 import cn.bugstack.domain.activity.model.entity.ActivitySkuEntity;
+import cn.bugstack.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 import cn.bugstack.domain.activity.repository.IActivityRepository;
 import cn.bugstack.domain.activity.service.rule.AbstractActionChain;
 import cn.bugstack.types.enums.ResponseCode;
@@ -37,6 +38,10 @@ public class ActivitySkuStockActionChain extends AbstractActionChain {
             log.info("活动责任链-商品库存扣减成功");
 
             //写入延迟队列，延迟消费更新库存记录
+            activityRepository.activitySkuStockConsumeSendQueue(ActivitySkuStockKeyVO.builder()
+                    .sku(activitySkuEntity.getSku())
+                    .activityId(activityEntity.getActivityId())
+                    .build());
 
             return true;
         }

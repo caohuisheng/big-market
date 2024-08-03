@@ -6,6 +6,7 @@ import cn.bugstack.domain.activity.model.entity.ActivityCountEntity;
 import cn.bugstack.domain.activity.model.entity.ActivityEntity;
 import cn.bugstack.domain.activity.model.entity.ActivityOrderEntity;
 import cn.bugstack.domain.activity.model.entity.ActivitySkuEntity;
+import cn.bugstack.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 import cn.bugstack.domain.activity.model.valobj.ActivityStateVO;
 import cn.bugstack.domain.activity.repository.IActivityRepository;
 import cn.bugstack.infrastructure.event.EventPublisher;
@@ -18,6 +19,8 @@ import cn.bugstack.types.common.Constants;
 import cn.bugstack.types.enums.ResponseCode;
 import cn.bugstack.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBlockingQueue;
+import org.redisson.api.RDelayedQueue;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -115,13 +118,13 @@ public class ActivityRepository implements IActivityRepository {
                                 .totalCountSurplus(createOrderAggregate.getTotalCount())
                                 .dayCount(createOrderAggregate.getDayCount())
                                 .dayCountSurplus(createOrderAggregate.getDayCount())
-                                .dayCountSurplus(createOrderAggregate.getDayCount())
                                 .monthCount(createOrderAggregate.getMonthCount())
                                 .monthCountSurplus(createOrderAggregate.getMonthCount())
                                 .build();
 
             //以用户id为切分键，通过 dbRouter 设定路由
             dbRouter.doRouter(createOrderAggregate.getUserId());
+            log.info("begin...");
             //编程式事务
             transactionTemplate.execute(status -> {
                 try {
@@ -168,7 +171,7 @@ public class ActivityRepository implements IActivityRepository {
             return false;
         }
 
-        //加锁为了兜底，如果厚度恢复库存、手动处理等，也不会超卖，因为所有可用库存key都被加锁
+        //加锁为了兜底，如果后续恢复库存、手动处理等，也不会超卖，因为所有可用库存key都被加锁
         //设置加锁时间为活动截止时间+延迟1天
         String lockKey = cacheKey + Constants.UNDERLINE + surplus;
         long expireMills = endDate.getTime() - System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
@@ -177,4 +180,35 @@ public class ActivityRepository implements IActivityRepository {
         return status;
     }
 
+    @Override
+    public void activitySkuStockConsumeSendQueue(ActivitySkuStockKeyVO activitySkuStockKeyVO) {
+        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY;
+        RBlockingQueue<ActivitySkuStockKeyVO> blockingQueue = redisService.getBlockingQueue(cacheKey);
+        RDelayedQueue<ActivitySkuStockKeyVO> delayedQueue = redisService.getDelayedQueue(blockingQueue);
+        delayedQueue.offer(activitySkuStockKeyVO, 3, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public ActivitySkuStockKeyVO takeQueueValue() {
+        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY;
+        RBlockingQueue<ActivitySkuStockKeyVO> destinationQueue = redisService.getBlockingQueue(cacheKey);
+        return destinationQueue.poll();
+    }
+
+    @Override
+    public void clearQueueValue() {
+        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY;
+        RBlockingQueue<Object> destinationQueue = redisService.getBlockingQueue(cacheKey);
+        destinationQueue.clear();
+    }
+
+    @Override
+    public void updateActivitySkuStock(Long sku) {
+        raffleActivitySkuDao.updateActivitySkuStock(sku);
+    }
+
+    @Override
+    public void clearActivitySkuStock(Long sku) {
+        raffleActivitySkuDao.clearActivitySkuStock(sku);
+    }
 }

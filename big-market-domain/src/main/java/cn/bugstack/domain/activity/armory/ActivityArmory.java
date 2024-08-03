@@ -3,6 +3,7 @@ package cn.bugstack.domain.activity.armory;
 import cn.bugstack.domain.activity.model.entity.ActivitySkuEntity;
 import cn.bugstack.domain.activity.repository.IActivityRepository;
 import cn.bugstack.types.common.Constants;
+import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.scanner.Constant;
 
 import javax.annotation.Resource;
@@ -13,13 +14,14 @@ import java.util.Date;
  * Description: 活动装配
  * CreateTime: 2024-07-31
  */
+@Service
 public class ActivityArmory implements IActivityArmory, IActivityDispatch {
 
     @Resource
     private IActivityRepository activityRepository;
 
     @Override
-    public void assembleActivitySku(Long sku) {
+    public boolean assembleActivitySku(Long sku) {
         //预热活动SKU库存
         ActivitySkuEntity activitySkuEntity = activityRepository.queryActivitySku(sku);
         cacheActivitySkuStockCount(sku, activitySkuEntity.getStockCount());
@@ -29,6 +31,7 @@ public class ActivityArmory implements IActivityArmory, IActivityDispatch {
 
         //预热活动次数
         activityRepository.queryRaffleActivityCountById(activitySkuEntity.getActivityCountId());
+        return true;
     }
 
     @Override

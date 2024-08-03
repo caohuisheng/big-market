@@ -14,6 +14,7 @@ app:
     # 跨域，开发阶段可以设置为 * 不限制
     cross-origin: '*'
 
+
 # 线程池配置
 thread:
   pool:
@@ -27,21 +28,31 @@ thread:
 
 # 数据库配置；启动时配置数据库资源信息
 spring:
-  datasource:
-    username: root
-    password: root
-    url: jdbc:mysql://127.0.0.1:3306/big_market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  hikari:
-    pool-name: Retail_HikariCP
-    minimum-idle: 15 #最小空闲连接数量
-    idle-timeout: 180000 #空闲连接存活最大时间，默认600000（10分钟）
-    maximum-pool-size: 25 #连接池最大连接数，默认是10
-    auto-commit: true  #此属性控制从池返回的连接的默认自动提交行为,默认值：true
-    max-lifetime: 1800000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
-    connection-timeout: 30000 #数据库连接超时时间,默认30秒，即30000
-    connection-test-query: SELECT 1
-  type: com.zaxxer.hikari.HikariDataSource
+#  datasource:
+#    username: root
+#    password: root
+#    url: jdbc:mysql://127.0.0.1:3306/big_market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#  hikari:
+#    pool-name: Retail_HikariCP
+#    minimum-idle: 15 #最小空闲连接数量
+#    idle-timeout: 180000 #空闲连接存活最大时间，默认600000（10分钟）
+#    maximum-pool-size: 25 #连接池最大连接数，默认是10
+#    auto-commit: true  #此属性控制从池返回的连接的默认自动提交行为,默认值：true
+#    max-lifetime: 1800000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
+#    connection-timeout: 30000 #数据库连接超时时间,默认30秒，即30000
+#    connection-test-query: SELECT 1
+#  type: com.zaxxer.hikari.HikariDataSource
+  rabbitmq:
+    addresses: 116.62.8.243
+    port: 15672
+    username: admin
+    password: admin
+    listener:
+      simple:
+        prefetch: 1 # 每次投递n个消息，消费完在投递n个
+    topic:
+      activity_sku_stock_zero: activity_sku_stock_zero
 
 mybatis:
   mapper-locations: classpath:/mybatis/mapper/*.xml
@@ -60,9 +71,9 @@ mini-db-router:
       list: db01,db02
       db00:
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://127.0.0.1:3306/big_market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+        url: jdbc:mysql://116.62.8.243:13306/big_market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
         username: root
-        password: root
+        password: 123456
         type-class-name: com.zaxxer.hikari.HikariDataSource
         pool:
           pool-name: Retail_HikariCP
@@ -75,9 +86,9 @@ mini-db-router:
           connection-test-query: SELECT 1
       db01:
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://127.0.0.1:3306/big_market_01?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+        url: jdbc:mysql://116.62.8.243:13306/big_market_01?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
         username: root
-        password: root
+        password: 123456
         type-class-name: com.zaxxer.hikari.HikariDataSource
         pool:
           pool-name: Retail_HikariCP
@@ -90,9 +101,9 @@ mini-db-router:
           connection-test-query: SELECT 1
       db02:
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://127.0.0.1:3306/big_market_02?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+        url: jdbc:mysql://116.62.8.243:13306/big_market_02?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
         username: root
-        password: root
+        password: 123456
         type-class-name: com.zaxxer.hikari.HikariDataSource
         pool:
           pool-name: Retail_HikariCP
@@ -108,8 +119,8 @@ mini-db-router:
 redis:
   sdk:
     config:
-      host: 127.0.0.1
-      port: 6379
+      host: 116.62.8.243
+      port: 16379
       pool-size: 10
       min-idle-size: 5
       idle-timeout: 30000
