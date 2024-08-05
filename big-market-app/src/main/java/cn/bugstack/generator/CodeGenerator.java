@@ -13,14 +13,14 @@ import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 public class CodeGenerator {
     public static void main(String[] args) {
         // 使用 FastAutoGenerator 快速配置代码生成器
-        FastAutoGenerator.create("jdbc:mysql://127.0.0.1:3306/big_market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true",
-                        "root", "root")
+        FastAutoGenerator.create("jdbc:mysql://116.62.8.243:13306/big_market_01?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true",
+                        "root", "123456")
                 .globalConfig(builder -> {
                     builder.author("chs") // 设置作者
                             .outputDir("big-market-infrastructure\\src\\main\\java"); // 输出目录
                 })
                 .packageConfig(builder -> {
-                    builder.parent("cn.bugstack.infrastructure.persistent.generator") // 设置父包名
+                    builder.parent("cn.bugstack.infrastructure.generator") // 设置父包名
                             .entity("model"); // 设置实体类包名
                             //.mapper("dao") // 设置 Mapper 接口包名
                             //.service("service") // 设置 Service 接口包名
@@ -28,10 +28,10 @@ public class CodeGenerator {
                             //.xml("mappers"); // 设置 Mapper XML 文件包名
                 })
                 .strategyConfig(builder -> {
-                    builder.addInclude("raffle_activity","raffle_activity_account","raffle_activity_account_flow","raffle_activity_count","raffle_activity_order") // 设置需要生成的表名
+                    builder.addInclude("raffle_activity_account_day","raffle_activity_account_month","task","user_award_record_000","user_raffle_order_000") // 设置需要生成的表名
                             .entityBuilder()
                             .enableLombok(); // 启用 Lombok
-                            //.enableTableFieldAnnotation() // 启用字段注解
+                            //.enableTableFieldAnnotation(); // 启用字段注解
                             //.controllerBuilder()
                             //.enableRestStyle(); // 启用 REST 风格
                 })

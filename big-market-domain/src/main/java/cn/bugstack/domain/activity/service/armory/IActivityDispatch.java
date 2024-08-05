@@ -1,4 +1,4 @@
-package cn.bugstack.domain.activity.armory;
+package cn.bugstack.domain.activity.service.armory;
 
 import java.util.Date;
 

@@ -1,4 +1,4 @@
-package cn.bugstack.domain.activity.service;
+package cn.bugstack.domain.activity.service.quota;
 
 import cn.bugstack.domain.activity.model.aggregate.CreateOrderAggregate;
 import cn.bugstack.domain.activity.model.entity.ActivityCountEntity;
@@ -6,8 +6,9 @@ import cn.bugstack.domain.activity.model.entity.ActivityEntity;
 import cn.bugstack.domain.activity.model.entity.ActivitySkuEntity;
 import cn.bugstack.domain.activity.model.entity.SkuRechargeEntity;
 import cn.bugstack.domain.activity.repository.IActivityRepository;
-import cn.bugstack.domain.activity.service.rule.IActionChain;
-import cn.bugstack.domain.activity.service.rule.factory.DefaultActivityChainFactory;
+import cn.bugstack.domain.activity.service.IRaffleActivityAccountQuotaService;
+import cn.bugstack.domain.activity.service.quota.rule.IActionChain;
+import cn.bugstack.domain.activity.service.quota.rule.factory.DefaultActivityChainFactory;
 import cn.bugstack.types.enums.ResponseCode;
 import cn.bugstack.types.exception.AppException;
 import org.apache.commons.lang3.StringUtils;
@@ -17,14 +18,14 @@ import org.apache.commons.lang3.StringUtils;
  * Description: 抽奖活动抽象类（定义标准的流程）
  * CreateTime: 2024-07-29
  */
-public abstract class AbstractRaffleActivity extends RaffleActivitySupport implements IRaffleOrder{
+public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityAccountQuotaSupport implements IRaffleActivityAccountQuotaService {
 
-    public AbstractRaffleActivity(IActivityRepository activityRepository, DefaultActivityChainFactory defaultActivityChainFactory){
+    public AbstractRaffleActivityAccountQuota(IActivityRepository activityRepository, DefaultActivityChainFactory defaultActivityChainFactory){
         super(activityRepository, defaultActivityChainFactory);
     }
 
     @Override
-    public String createSkuRechargeOrder(SkuRechargeEntity skuRechargeEntity) {
+    public String createOrder(SkuRechargeEntity skuRechargeEntity) {
         //1.参数校验
         String userId = skuRechargeEntity.getUserId();
         Long sku = skuRechargeEntity.getSku();

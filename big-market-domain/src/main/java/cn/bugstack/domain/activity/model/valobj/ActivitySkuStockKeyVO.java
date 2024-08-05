@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ActivitySkuStockKeyVO {
 
     //商品sku

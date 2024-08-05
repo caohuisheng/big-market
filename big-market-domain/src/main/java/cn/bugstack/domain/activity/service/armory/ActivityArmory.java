@@ -1,10 +1,9 @@
-package cn.bugstack.domain.activity.armory;
+package cn.bugstack.domain.activity.service.armory;
 
 import cn.bugstack.domain.activity.model.entity.ActivitySkuEntity;
 import cn.bugstack.domain.activity.repository.IActivityRepository;
 import cn.bugstack.types.common.Constants;
 import org.springframework.stereotype.Service;
-import org.yaml.snakeyaml.scanner.Constant;
 
 import javax.annotation.Resource;
 import java.util.Date;

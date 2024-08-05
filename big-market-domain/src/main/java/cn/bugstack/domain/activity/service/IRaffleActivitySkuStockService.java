@@ -7,17 +7,17 @@ import cn.bugstack.domain.activity.model.valobj.ActivitySkuStockKeyVO;
  * Description: 活动sku库存处理接口
  * CreateTime: 2024-08-02
  */
-public interface ISkuStock {
+public interface IRaffleActivitySkuStockService {
 
     /**
      * 获取sku库存消耗队列
-     * @return
+     * @return 奖品库存key信息
      * @throws InterruptedException
      */
     ActivitySkuStockKeyVO takeQueueValue() throws InterruptedException;
 
     /**
-     * 清空队列
+     * 清空延迟队列
      */
     void clearQueueValue();
 
