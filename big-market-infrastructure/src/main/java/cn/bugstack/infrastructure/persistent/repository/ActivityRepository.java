@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RDelayedQueue;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -269,38 +271,82 @@ public class ActivityRepository implements IActivityRepository {
         ActivityAccountDayEntity activityAccountDayEntity = createPartakeOrderAggregate.getActivityAccountDayEntity();
         UserRaffleOrderEntity userRaffleOrderEntity = createPartakeOrderAggregate.getUserRaffleOrderEntity();
 
-        dbRouter.doRouter("userId");
-        transactionTemplate.execute(status -> {
-            //1.更新总账户
-            int totalCount = raffleActivityAccountDao.updateActivityAccountSubtractionQuota(
-                    RaffleActivityAccount.builder()
-                            .userId(userId)
-                            .activityId(activityId)
-                            .build());
-            if(1 != totalCount){
-                status.setRollbackOnly();
-                log.warn("写入创建参与活动记录，更新总账户额度不足，异常 userId:{} activityId:{}", userId, activityId);
-                throw new AppException(ResponseCode.ACCOUNT_QUOTA_ERROR.getCode(), ResponseCode.ACCOUNT_QUOTA_ERROR.getInfo());
-            }
+        try {
+            dbRouter.doRouter("userId");
+            transactionTemplate.execute(status -> {
+                try {
+                    //1.更新总账户
+                    int totalCount = raffleActivityAccountDao.updateActivityAccountSubtractionQuota(
+                            RaffleActivityAccount.builder()
+                                    .userId(userId)
+                                    .activityId(activityId)
+                                    .build());
+                    if(1 != totalCount){
+                        status.setRollbackOnly();
+                        log.warn("写入创建参与活动记录，更新总账户额度不足，异常 userId:{} activityId:{}", userId, activityId);
+                        throw new AppException(ResponseCode.ACCOUNT_QUOTA_ERROR.getCode(), ResponseCode.ACCOUNT_QUOTA_ERROR.getInfo());
+                    }
 
-            //2.创建或更新月账户
-            if(createPartakeOrderAggregate.isExistAccountMonth()){
-                int updateMonthCount = raffleActivityAccountMonthDao.updateActivityAccountMonth(userId, activityId, activityAccountMonthEntity.getMonth());
-                if(1 != updateMonthCount){
+                    //2.创建或更新月账户
+                    if(createPartakeOrderAggregate.isExistAccountMonth()){
+                        int updateMonthCount = raffleActivityAccountMonthDao.updateActivityAccountMonth(userId, activityId, activityAccountMonthEntity.getMonth());
+                        if(1 != updateMonthCount){
+                            status.setRollbackOnly();
+                            log.warn("写入创建参与活动记录，更新月账户额度不足，异常 userId:{} activityId:{} month:{}", userId, activityId, activityAccountMonthEntity.getMonth());
+                            throw new AppException(ResponseCode.ACCOUNT_QUOTA_MONTH_ERROR.getCode(), ResponseCode.ACCOUNT_QUOTA_MONTH_ERROR.getInfo());
+                        }
+                    }else{
+                        RaffleActivityAccountMonth raffleActivityAccountMonth = new RaffleActivityAccountMonth();
+                        BeanUtils.copyProperties(activityAccountMonthEntity, raffleActivityAccountMonth);
+                        raffleActivityAccountMonth.setMonthCountSurplus(raffleActivityAccountMonth.getMonthCountSurplus() - 1);
+                        raffleActivityAccountMonthDao.insertActivityAccountMonth(raffleActivityAccountMonth);
+                        //新创建月账户，则更新总账户表中月镜像额度
+                        raffleActivityAccountDao.updateActivityAccountMonthSurplusImageQuota(
+                                RaffleActivityAccount.builder()
+                                        .userId(userId)
+                                        .activityId(activityId)
+                                        .monthCountSurplus(activityAccountEntity.getMonthCountSurplus())
+                                        .build());
+                    }
+
+                    //3.创建或更新日账户
+                    if(createPartakeOrderAggregate.isExistAccountDay()){
+                        int updateDayCount = raffleActivityAccountDayDao.updateActivityAccountDay(userId, activityId, activityAccountDayEntity.getDay());
+                        if(1 != updateDayCount){
+                            status.setRollbackOnly();
+                            log.warn("写入创建参与活动记录，更新日账户额度不足，异常 userId:{} activityId:{} day:{}", userId, activityId, activityAccountDayEntity.getDay());
+                            throw new AppException(ResponseCode.ACCOUNT_QUOTA_DAY_ERROR.getCode(), ResponseCode.ACCOUNT_QUOTA_DAY_ERROR.getInfo());
+                        }
+                    }else{
+                        RaffleActivityAccountDay raffleActivityAccountDay = new RaffleActivityAccountDay();
+                        BeanUtils.copyProperties(activityAccountDayEntity, raffleActivityAccountDay);
+                        raffleActivityAccountDay.setDayCountSurplus(raffleActivityAccountDay.getDayCountSurplus() - 1);
+                        raffleActivityAccountDayDao.insertActivityAccountDay(raffleActivityAccountDay);
+                        //新创建月账户，则更新总账户表中日镜像额度
+                        raffleActivityAccountDao.updateActivityAccountDaySurplusImageQuota(
+                                RaffleActivityAccount.builder()
+                                        .userId(userId)
+                                        .activityId(activityId)
+                                        .dayCountSurplus(activityAccountEntity.getDayCountSurplus())
+                                        .build()
+                        );
+                    }
+
+                    //4.写入参与活动订单
+                    UserRaffleOrder userRaffleOrder = new UserRaffleOrder();
+                    BeanUtils.copyProperties(userRaffleOrderEntity, userRaffleOrder);
+                    userRaffleOrder.setOrderState(userRaffleOrderEntity.getOrderState().getCode());
+                    userRaffleOrderDao.insert(userRaffleOrder);
+
+                    return 1;
+                } catch (DuplicateKeyException e) {
                     status.setRollbackOnly();
-                    log.warn("写入创建参与活动记录，更新月账户额度不足，异常 userId:{} activityId:{} month:{}", userId, activityId, activityAccountMonthEntity.getMonth());
-                    throw new AppException(ResponseCode.ACCOUNT_QUOTA_MONTH_ERROR.getCode(), ResponseCode.ACCOUNT_QUOTA_MONTH_ERROR.getInfo());
+                    log.error("写入创建参与活动记录，唯一索引冲突 userId:{} activityId:{}", userId, activityId, e);
+                    throw new AppException(ResponseCode.INDEX_DUP.getCode(), e);
                 }
-            }else{
-                raffleActivityAccountMonthDao.insertActivityAccountMonth(
-                        RaffleActivityAccountMonth.builder()
-                                .userId(userId)
-                                .activityId(activityId)
-                                .month(activityAccountMonthEntity.getMonth())
-                                .monthCount(activityAccountMonthEntity.getMonthCount())
-                                .build());
-            }
-        });
-
+            });
+        } finally {
+            dbRouter.clear();
+        }
     }
 }

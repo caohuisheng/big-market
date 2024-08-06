@@ -13,10 +13,10 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface RaffleActivityAccountDayDao {
 
-    @DBRouter
     void insertActivityAccountDay(RaffleActivityAccountDay raffleActivityAccountDay);
 
+    @DBRouter
     RaffleActivityAccountDay queryActivityAccountDayByUserId(String userId, Long activityId, String day);
 
-    void updateActivityAccountDay(String userId, Long activityId, String day);
+    int updateActivityAccountDay(String userId, Long activityId, String day);
 }

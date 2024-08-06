@@ -60,7 +60,7 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
 
         //4.构建订单
         UserRaffleOrderEntity userRaffleOrder = this.buildUserRaffleOrder(userId, activityId, currentDate);
-        createPartakeOrderAggregate.setUserRaffleOrderEntity(userRaffleOrderEntity);
+        createPartakeOrderAggregate.setUserRaffleOrderEntity(userRaffleOrder);
 
         //5.保存聚合对象（一个领域内的聚合是一个事务操作）
         activityRepository.saveCreatePartakeOrderAggregate(createPartakeOrderAggregate);

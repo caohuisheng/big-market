@@ -12,9 +12,9 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface RaffleActivityAccountMonthDao {
 
-    @DBRouter
     void insertActivityAccountMonth(RaffleActivityAccountMonth raffleActivityAccountMonth);
 
+    @DBRouter
     RaffleActivityAccountMonth queryActivityAccountMonthByUserId(String userId, Long activityId, String month);
 
     int updateActivityAccountMonth(String userId, Long activityId, String month);

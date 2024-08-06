@@ -1,6 +1,7 @@
 package cn.bugstack.domain.activity.model.entity;
 
 import cn.bugstack.domain.activity.model.valobj.UserRaffleOrderStateVO;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.Date;
 @Data
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class UserRaffleOrderEntity {
     /**
      * 用户ID
