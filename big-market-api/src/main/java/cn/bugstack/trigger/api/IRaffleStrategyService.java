@@ -13,7 +13,7 @@ import java.util.List;
  * Description: 抽奖服务接口
  * CreateTime: 2024-07-19
  */
-public interface IRaffleService {
+public interface IRaffleStrategyService {
 
     /**
      * 策略装配接口

@@ -101,9 +101,9 @@ public abstract class AbstractRaffleStrategy_old implements IRaffleStrategy {
 
         if(RuleLogicCheckTypeVO.TAKE_OVER.getCode().equals(centerRuleActionEntity.getCode())){
             log.info("【临时日志】中奖中规则过滤，通过抽奖后规则 rule_luck_award 走兜底奖励");
-            return RaffleAwardEntity.builder()
-                    .awardDesc("中奖中规则过滤，通过抽奖后规则 rule_luck_award 走兜底奖励")
-                    .build();
+            //return RaffleAwardEntity.builder()
+            //        .awardDesc("中奖中规则过滤，通过抽奖后规则 rule_luck_award 走兜底奖励")
+            //        .build();
         }
 
         return RaffleAwardEntity.builder()

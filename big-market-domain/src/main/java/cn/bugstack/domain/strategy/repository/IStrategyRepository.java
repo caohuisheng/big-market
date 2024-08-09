@@ -6,7 +6,6 @@ import cn.bugstack.domain.strategy.model.entity.StrategyRuleEntity;
 import cn.bugstack.domain.strategy.model.valobj.RuleTreeVO;
 import cn.bugstack.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
 import cn.bugstack.domain.strategy.model.valobj.StrategyAwardStockKeyVO;
-import org.springframework.boot.autoconfigure.web.WebProperties;
 
 import java.util.Date;
 import java.util.List;
@@ -18,7 +17,11 @@ import java.util.Map;
  * @create 2023-12-23 09:33
  */
 public interface IStrategyRepository {
+    Long queryStrategyIdByActivityId(Long activityId);
+
     List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId);
+
+    StrategyAwardEntity queryStrategyAwardEntity(Long strategyId, Integer awardId);
 
     void storeStrategyAwardSearchRateTable(String key, Integer rateRange, Map<Integer, Integer> strategyAwardSearchRateTable);
 

@@ -47,11 +47,20 @@ public class StrategyRepository implements IStrategyRepository {
     @Resource
     private StrategyRuleDao strategyRuleDao;
     @Resource
+    private RaffleActivityDao raffleActivityDao;
+    @Resource
     private RuleTreeDao ruleTreeDao;
     @Resource
     private RuleTreeNodeDao ruleTreeNodeDao;
     @Resource
     private RuleTreeNodeLineDao ruleTreeNodeLineDao;
+
+
+    @Override
+    public Long queryStrategyIdByActivityId(Long activityId) {
+        RaffleActivity raffleActivity = raffleActivityDao.queryRaffleActivityById(activityId);
+        return raffleActivity.getStrategyId();
+    }
 
     @Override
     public List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId) {
@@ -72,6 +81,24 @@ public class StrategyRepository implements IStrategyRepository {
         redisService.setValue(cacheKey, strategyAwardEntities);
 
         return strategyAwardEntities;
+    }
+
+    @Override
+    public StrategyAwardEntity queryStrategyAwardEntity(Long strategyId, Integer awardId) {
+        //先从缓存中查询
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_KEY + strategyId + Constants.UNDERLINE + awardId;
+        StrategyAwardEntity strategyAwardEntity = redisService.getValue(cacheKey);
+        if(null != strategyAwardEntity){
+            return strategyAwardEntity;
+        }
+        // 若缓存中没有, 再从数据库查询
+        StrategyAward strategyAward = strategyAwardDao.queryStrategyAward(strategyId, awardId);
+        strategyAwardEntity = new StrategyAwardEntity();
+        BeanUtils.copyProperties(strategyAward, strategyAwardEntity);
+        // 将查询结果保存到缓存
+        redisService.setValue(cacheKey, strategyAwardEntity);
+
+        return strategyAwardEntity;
     }
 
     @Override

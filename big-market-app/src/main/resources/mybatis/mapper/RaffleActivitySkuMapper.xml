@@ -15,6 +15,10 @@
         select * from raffle_activity_sku where sku = #{sku}
     </select>
 
+    <select id="queryActivitySkuByActivityId" parameterType="long" resultMap="dataMap">
+        select * from raffle_activity_sku where activity_id = #{activityId}
+    </select>
+
     <update id="updateActivitySkuStock" parameterType="long">
         update raffle_activity_sku set stock_count = stock_count_surplus - 1 where sku = #{sku} and stock_count_surplus > 0
     </update>

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Author: chs
@@ -31,6 +32,20 @@ public class ActivityArmory implements IActivityArmory, IActivityDispatch {
         //预热活动次数
         activityRepository.queryRaffleActivityCountById(activitySkuEntity.getActivityCountId());
         return true;
+    }
+
+    @Override
+    public boolean assembleActivitySkuByActivityId(Long activityId) {
+        List<ActivitySkuEntity> activitySkuEntities = activityRepository.queryActivitySkuByActivityId(activityId);
+        for (ActivitySkuEntity activitySkuEntity : activitySkuEntities) {
+            cacheActivitySkuStockCount(activitySkuEntity.getSku(), activitySkuEntity.getStockCount());
+            //预热活动次数
+            activityRepository.queryRaffleActivityCountById(activitySkuEntity.getActivityCountId());
+        }
+
+        //预热活动
+        activityRepository.queryRaffleActivityById(activityId);
+        return false;
     }
 
     @Override

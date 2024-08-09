@@ -28,7 +28,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Author: chs
@@ -73,6 +75,17 @@ public class ActivityRepository implements IActivityRepository {
         ActivitySkuEntity activitySkuEntity = new ActivitySkuEntity();
         BeanUtils.copyProperties(raffleActivitySku, activitySkuEntity);
         return activitySkuEntity;
+    }
+
+    @Override
+    public List<ActivitySkuEntity> queryActivitySkuByActivityId(Long activityId) {
+        List<RaffleActivitySku> raffleActivitySkus = raffleActivitySkuDao.queryActivitySkuByActivityId(activityId);
+        List<ActivitySkuEntity> activitySkuEntities = raffleActivitySkus.stream().map(raffleActivitySku -> {
+            ActivitySkuEntity activitySkuEntity = new ActivitySkuEntity();
+            BeanUtils.copyProperties(raffleActivitySku, activitySkuEntity);
+            return activitySkuEntity;
+        }).collect(Collectors.toList());
+        return activitySkuEntities;
     }
 
     @Override

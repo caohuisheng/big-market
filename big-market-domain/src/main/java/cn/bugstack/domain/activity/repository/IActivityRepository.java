@@ -6,6 +6,7 @@ import cn.bugstack.domain.activity.model.entity.*;
 import cn.bugstack.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Author: chs
@@ -14,6 +15,8 @@ import java.util.Date;
  */
 public interface IActivityRepository {
     ActivitySkuEntity queryActivitySku(Long sku);
+
+    List<ActivitySkuEntity> queryActivitySkuByActivityId(Long activityId);
 
     ActivityEntity queryRaffleActivityById(Long activityId);
 

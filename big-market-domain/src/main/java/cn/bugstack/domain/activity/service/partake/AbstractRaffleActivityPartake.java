@@ -30,10 +30,8 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
     }
 
     @Override
-    public UserRaffleOrderEntity createOrder(PartakeRaffleActivityEntity partakeRaffleActivityEntity) {
+    public UserRaffleOrderEntity createOrder(String userId, Long activityId) {
         //0.基础信息
-        String userId = partakeRaffleActivityEntity.getUserId();
-        Long activityId = partakeRaffleActivityEntity.getActivityId();
         Date currentDate = new Date();
 
         //1.活动查询

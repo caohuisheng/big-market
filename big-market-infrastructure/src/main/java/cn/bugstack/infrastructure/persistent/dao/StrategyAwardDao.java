@@ -23,6 +23,14 @@ public interface StrategyAwardDao {
     List<StrategyAward> queryStrategyAwardList();
 
     /**
+     * 根据活动id和奖品id查询单个奖品
+     * @param strategyId 策略id
+     * @param awardId 奖品id
+     * @return
+     */
+    StrategyAward queryStrategyAward(Long strategyId, Integer awardId);
+
+    /**
      * 根据策略id查询策略奖品列表
      * @return
      */

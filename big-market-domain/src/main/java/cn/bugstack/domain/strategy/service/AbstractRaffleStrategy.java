@@ -3,6 +3,7 @@ package cn.bugstack.domain.strategy.service;
 import cn.bugstack.domain.strategy.model.entity.RaffleAwardEntity;
 import cn.bugstack.domain.strategy.model.entity.RaffleFactorEntity;
 import cn.bugstack.domain.strategy.model.entity.RuleActionEntity;
+import cn.bugstack.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bugstack.domain.strategy.model.valobj.RuleLogicCheckTypeVO;
 import cn.bugstack.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
@@ -73,9 +74,20 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
         log.info("抽奖策略计算-规则树 userId:{}, strategyId:{}, awardId:{}, awardRuleValue:{}", userId, strategyId, awardId, treeStrategyAwardVO.getAwardRuleValue());
 
         // 4.返回抽奖结果
+        //return RaffleAwardEntity.builder()
+        //        .awardId(treeStrategyAwardVO.getAwardId())
+        //        .awardConfig(treeStrategyAwardVO.getAwardRuleValue())
+        //        .build();
+        return buildRaffleAwardEntity(strategyId, treeStrategyAwardVO.getAwardId(), treeStrategyAwardVO.getAwardRuleValue());
+    }
+
+    private RaffleAwardEntity buildRaffleAwardEntity(Long strategyId, Integer awardId, String awardConfig){
+        StrategyAwardEntity strategyAwardEntity = repository.queryStrategyAwardEntity(strategyId, awardId);
         return RaffleAwardEntity.builder()
-                .awardId(treeStrategyAwardVO.getAwardId())
-                .awardConfig(treeStrategyAwardVO.getAwardRuleValue())
+                .awardId(awardId)
+                .awardTitle(strategyAwardEntity.getAwardTitle())
+                .awardConfig(awardConfig)
+                .sort(strategyAwardEntity.getSort())
                 .build();
     }
 

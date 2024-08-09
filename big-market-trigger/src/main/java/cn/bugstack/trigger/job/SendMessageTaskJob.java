@@ -27,12 +27,12 @@ public class SendMessageTaskJob {
     @Resource
     private IDBRouterStrategy dbRouter;
 
-    @Scheduled(cron = "1/5 * * * * ?")
+    @Scheduled(cron = "1/10 * * * * ?")
     public void exec(){
         try {
+            log.info("定时任务，扫描任务表发送消息");
             //获取分库数量
             int dbCount = dbRouter.dbCount();
-            System.out.println("====dbCount:" + dbCount);
             //逐个库扫描，每个库一个任务表
             for (int i = 1; i <= dbCount; i++) {
                 final int dbKey = i;
