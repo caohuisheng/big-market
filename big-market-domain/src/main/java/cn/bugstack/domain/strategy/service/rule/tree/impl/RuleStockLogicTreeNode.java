@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Date;
 
 /**
  * Author: chs
@@ -26,10 +27,10 @@ public class RuleStockLogicTreeNode implements ILogicTreeNode {
     private IStrategyRepository repository;
 
     @Override
-    public DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId, String ruleValue) {
+    public DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId, String ruleValue, Date endDatetime) {
         log.info("规则过滤-库存扣减 userId:{}, strategyId:{}, awardId:{}", userId, strategyId, awardId);
         // 扣减库存
-        Boolean success = strategyDispatch.subtractionAwardStock(strategyId, awardId);
+        Boolean success = strategyDispatch.subtractionAwardStock(strategyId, awardId, endDatetime);
         // 如果库存扣减成功，规则节点接管
         if(success){
             log.info("规则过滤-库存扣减成功！");

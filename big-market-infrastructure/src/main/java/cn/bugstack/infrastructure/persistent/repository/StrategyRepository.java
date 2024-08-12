@@ -22,10 +22,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
 import javax.annotation.Resources;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -233,7 +230,7 @@ public class StrategyRepository implements IStrategyRepository {
     }
 
     @Override
-    public Boolean subtractionAwardStock(String cacheKey) {
+    public Boolean subtractionAwardStock(String cacheKey, Date endDatetime) {
         // 扣减库存
         long surplus = redisService.decr(cacheKey);
         // 如果剩余库存小于0，设置库存值为0，并返回false
@@ -243,11 +240,18 @@ public class StrategyRepository implements IStrategyRepository {
         }
 
         String lockKey = cacheKey + Constants.UNDERLINE + surplus;
-        Boolean success = redisService.setNx(lockKey);
-        if(success == false){
+        boolean status;
+
+        if(null != endDatetime){
+            long expireTime = endDatetime.getTime() - System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
+            status = redisService.setNx(lockKey, expireTime, TimeUnit.MILLISECONDS);
+        }else{
+            status = redisService.setNx(lockKey);
+        }
+        if(!status){
             log.info("策略奖品库存加锁失败, lockKey:{}", lockKey);
         }
-        return true;
+        return status;
     }
 
     @Override
@@ -273,4 +277,14 @@ public class StrategyRepository implements IStrategyRepository {
         return blockingQueue.poll();
     }
 
+    @Override
+    public Map<String, Integer> queryAwardRuleLockCount(String[] treeIds) {
+        List<RuleTreeNode> ruleTreeNodes = ruleTreeNodeDao.queryRuleLocks(treeIds);
+        if(ruleTreeNodes == null || ruleTreeNodes.isEmpty()) return new HashMap<>();
+        Map<String, Integer> resultMap = new HashMap<>();
+        for (RuleTreeNode ruleTreeNode : ruleTreeNodes) {
+            resultMap.put(ruleTreeNode.getTreeId(), Integer.parseInt(ruleTreeNode.getRuleValue()));
+        }
+        return resultMap;
+    }
 }

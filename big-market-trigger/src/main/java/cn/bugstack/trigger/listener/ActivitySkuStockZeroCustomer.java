@@ -33,7 +33,9 @@ public class ActivitySkuStockZeroCustomer {
             BaseEvent.EventMessage<Long> eventMessage = JSON.parseObject(message, new TypeReference<BaseEvent.EventMessage<Long>>() {
             }.getType());
             Long sku = eventMessage.getData();
+            //清空库存
             skuStock.clearActivitySkuStock(sku);
+            //清空队列
             skuStock.clearQueueValue();
         } catch (Exception e) {
             log.error("监听活动sku库存消耗为0，消费失败 topic:{} message:{}", topic, message);

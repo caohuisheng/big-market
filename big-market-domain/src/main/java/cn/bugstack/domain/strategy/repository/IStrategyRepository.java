@@ -62,7 +62,7 @@ public interface IStrategyRepository {
      * @param cacheKey 键
      * @return 扣减结果
      */
-    Boolean subtractionAwardStock(String cacheKey);
+    Boolean subtractionAwardStock(String cacheKey, Date endDatetime);
 
     /**
      * 写入奖品库存消费队列
@@ -83,4 +83,5 @@ public interface IStrategyRepository {
      */
     void updateStrategyAwardStock(Long strategyId, Integer awardId);
 
+    Map<String, Integer> queryAwardRuleLockCount(String[] treeIds);
 }

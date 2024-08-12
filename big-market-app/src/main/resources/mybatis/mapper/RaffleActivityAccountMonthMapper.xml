@@ -22,6 +22,11 @@
         where user_id = #{userId} and activity_id = #{activityId} and month = #{month}
     </select>
 
+    <select id="query" resultMap="DataMap">
+        select * from raffle_activity_account_month
+        where user_id = #{userId} and activity_id = #{activityId} and month = #{month}
+    </select>
+
     <update id="updateActivityAccountMonth">
         update raffle_activity_account_month
         set month_count_surplus = month_count_surplus - 1

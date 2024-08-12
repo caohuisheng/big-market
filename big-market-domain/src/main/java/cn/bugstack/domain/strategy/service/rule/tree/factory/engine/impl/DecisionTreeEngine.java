@@ -9,6 +9,7 @@ import cn.bugstack.domain.strategy.service.rule.tree.factory.DefaultTreeFactory;
 import cn.bugstack.domain.strategy.service.rule.tree.factory.engine.IDecisionTreeEngine;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
     }
 
     @Override
-    public DefaultTreeFactory.StrategyAwardVO process(String userId, Long strategyId, Integer awardId) {
+    public DefaultTreeFactory.StrategyAwardVO process(String userId, Long strategyId, Integer awardId, Date endDatetime) {
         DefaultTreeFactory.StrategyAwardVO strategyAwardData = null;
 
         // 获取决策树根节点名
@@ -46,7 +47,7 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
             String ruleValue = ruleTreeNode.getRuleValue();
 
             // 决策节点计算
-            DefaultTreeFactory.TreeActionEntity logicEntity = logicTreeNode.logic(userId, strategyId, awardId, ruleValue);
+            DefaultTreeFactory.TreeActionEntity logicEntity = logicTreeNode.logic(userId, strategyId, awardId, ruleValue, endDatetime);
             RuleLogicCheckTypeVO ruleLogicCheckTypeVO = logicEntity.getRuleLogicCheckTypeVO();
             strategyAwardData = logicEntity.getStrategyAwardData();
             log.info("决策树引擎【{}】treeId:{}, node:{}, code:{}",ruleTreeVO.getTreeName(), ruleTreeVO.getTreeId(),

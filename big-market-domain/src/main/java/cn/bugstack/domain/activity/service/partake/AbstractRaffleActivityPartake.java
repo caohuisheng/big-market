@@ -48,8 +48,10 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
 
         //2.查询未被使用的活动参与订单记录
         UserRaffleOrderEntity userRaffleOrderEntity = activityRepository.queryNoUsedRaffleOrder(userId, activityId);
+
         if(null != userRaffleOrderEntity){
-            log.info("创建参与活动订单 userId:{} activityId:{} userRaffleOrderEntity",userId, activityId, JSON.toJSONString(userRaffleOrderEntity));
+            log.info("使用未被使用的参与活动订单 userId:{} activityId:{} userRaffleOrderEntity",userId, activityId, JSON.toJSONString(userRaffleOrderEntity));
+            userRaffleOrderEntity.setEndDatetime(activityEntity.getEndDateTime()); //设置活动结束时间
             return userRaffleOrderEntity;
         }
 
@@ -57,14 +59,15 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
         CreatePartakeOrderAggregate createPartakeOrderAggregate = this.doFilterAccount(userId, activityId, currentDate);
 
         //4.构建订单
-        UserRaffleOrderEntity userRaffleOrder = this.buildUserRaffleOrder(userId, activityId, currentDate);
-        createPartakeOrderAggregate.setUserRaffleOrderEntity(userRaffleOrder);
+        userRaffleOrderEntity = this.buildUserRaffleOrder(userId, activityId, currentDate);
+        userRaffleOrderEntity.setEndDatetime(activityEntity.getEndDateTime()); //设置活动结束时间
+        createPartakeOrderAggregate.setUserRaffleOrderEntity(userRaffleOrderEntity);
 
         //5.保存聚合对象（一个领域内的聚合是一个事务操作）
         activityRepository.saveCreatePartakeOrderAggregate(createPartakeOrderAggregate);
 
         //6.返回订单信息
-        return userRaffleOrder;
+        return userRaffleOrderEntity;
     }
 
     protected abstract CreatePartakeOrderAggregate doFilterAccount(String userId, Long activityId, Date currentDate);

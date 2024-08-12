@@ -15,8 +15,11 @@ public interface RaffleActivityAccountDayDao {
 
     void insertActivityAccountDay(RaffleActivityAccountDay raffleActivityAccountDay);
 
-    @DBRouter
-    RaffleActivityAccountDay queryActivityAccountDayByUserId(String userId, Long activityId, String day);
+    @DBRouter(key = "userId")
+    RaffleActivityAccountDay queryActivityAccountDayByUserId(RaffleActivityAccountDay activityAccountDayReq);
 
     int updateActivityAccountDay(String userId, Long activityId, String day);
+
+    @DBRouter(key = "userId")
+    Integer queryRaffleActivityAccountDayPartakeCount(RaffleActivityAccountDay raffleActivityAccountDayReq);
 }

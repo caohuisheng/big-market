@@ -27,7 +27,7 @@ public class SendMessageTaskJob {
     @Resource
     private IDBRouterStrategy dbRouter;
 
-    @Scheduled(cron = "1/10 * * * * ?")
+    @Scheduled(cron = "1/15 * * * * ?")
     public void exec(){
         try {
             log.info("定时任务，扫描任务表发送消息");

@@ -17,7 +17,7 @@
         values(#{userId}, #{activityId}, #{day}, #{dayCount}, #{dayCountSurplus})
     </insert>
 
-    <select id="queryActivityAccountDayByUserId" resultMap="DataMap">
+    <select id="queryActivityAccountDayByUserId" parameterType="cn.bugstack.infrastructure.persistent.po.RaffleActivityAccountDay" resultMap="DataMap">
         select * from raffle_activity_account_day
         where user_id = #{userId} and activity_id = #{activityId} and day = #{day}
     </select>
@@ -27,5 +27,10 @@
         set day_count_surplus = day_count_surplus - 1
         where user_id = #{userId} and activity_id = #{activityId} and day = #{day} and day_count_surplus > 0
     </update>
+
+    <select id="queryRaffleActivityAccountDayPartakeCount" parameterType="cn.bugstack.infrastructure.persistent.po.RaffleActivityAccountDay" resultType="integer">
+        select day_count - day_count_surplus from raffle_activity_account_day
+        where user_id = #{userId} and activity_id = #{activityId} and day = #{day}
+    </select>
 
 </mapper>

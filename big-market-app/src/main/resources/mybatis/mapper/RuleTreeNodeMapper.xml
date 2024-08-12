@@ -16,4 +16,12 @@
         SELECT * FROM rule_tree_node where tree_id = #{treeId}
     </select>
 
+    <select id="queryRuleLocks" resultMap="DataMap">
+        select * from rule_tree_node
+        where rule_key = 'rule_lock' and tree_id in
+        <foreach item="treeId" collection="array" open="(" separator="," close=")">
+            #{treeId}
+        </foreach>
+    </select>
+
 </mapper>

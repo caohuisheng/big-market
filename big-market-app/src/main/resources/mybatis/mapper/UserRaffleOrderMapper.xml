@@ -1,23 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.bugstack.infrastructure.persistent.dao.UserRaffleOrderDao">
-<!--
-CREATE TABLE `user_raffle_order_000` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` varchar(32) NOT NULL COMMENT '用户ID',
-  `activity_id` bigint NOT NULL COMMENT '活动ID',
-  `activity_name` varchar(64) NOT NULL COMMENT '活动名称',
-  `strategy_id` bigint NOT NULL COMMENT '抽奖策略ID',
-  `order_id` varchar(12) NOT NULL COMMENT '订单ID',
-  `order_time` datetime NOT NULL COMMENT '下单时间',
-  `order_state` varchar(16) NOT NULL DEFAULT 'create' COMMENT '订单状态；create-创建、used-已使用、cancel-已作废',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_order_id` (`order_id`),
-  KEY `idx_user_id_activity_id` (`user_id`,`activity_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户抽奖订单表';
--->
     <resultMap id="DataMap" type="cn.bugstack.infrastructure.persistent.po.UserRaffleOrder">
         <result column="user_id" property="userId"/>
         <result column="activity_id" property="activityId"/>
@@ -39,5 +22,9 @@ CREATE TABLE `user_raffle_order_000` (
         select * from user_raffle_order
         where user_id = #{userId} and activity_id = #{activityId} and order_state = "create"
     </select>
+
+    <update id="updateUserRaffleOrderUsed" parameterType="cn.bugstack.infrastructure.persistent.po.UserRaffleOrder">
+        update user_raffle_order set order_state = "used" where order_state = 'create' and user_id = #{userId} order_id = #{orderId}
+    </update>
 
 </mapper>

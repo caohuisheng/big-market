@@ -14,8 +14,8 @@ public interface RaffleActivityAccountMonthDao {
 
     void insertActivityAccountMonth(RaffleActivityAccountMonth raffleActivityAccountMonth);
 
-    @DBRouter
-    RaffleActivityAccountMonth queryActivityAccountMonthByUserId(String userId, Long activityId, String month);
+    @DBRouter(key = "userId")
+    RaffleActivityAccountMonth queryActivityAccountMonthByUserId(RaffleActivityAccountMonth activityAccountMonthReq);
 
     int updateActivityAccountMonth(String userId, Long activityId, String month);
 }

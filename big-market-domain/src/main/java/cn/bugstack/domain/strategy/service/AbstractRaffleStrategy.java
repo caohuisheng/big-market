@@ -20,10 +20,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: chs
@@ -55,6 +52,7 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
         //1.参数校验
         String userId = raffleFactorEntity.getUserId();
         Long strategyId = raffleFactorEntity.getStrategyId();
+        Date endDatetime = raffleFactorEntity.getEndDatetime();
         if(null == strategyId || StringUtils.isBlank(userId)){
             throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(),ResponseCode.ILLEGAL_PARAMETER.getInfo());
         }
@@ -70,7 +68,7 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
         }
 
         // 3.规则树抽奖计算
-        DefaultTreeFactory.StrategyAwardVO treeStrategyAwardVO = this.raffleLogicTree(userId, strategyId, awardId);
+        DefaultTreeFactory.StrategyAwardVO treeStrategyAwardVO = this.raffleLogicTree(userId, strategyId, awardId, endDatetime);
         log.info("抽奖策略计算-规则树 userId:{}, strategyId:{}, awardId:{}, awardRuleValue:{}", userId, strategyId, awardId, treeStrategyAwardVO.getAwardRuleValue());
 
         // 4.返回抽奖结果
@@ -106,6 +104,6 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
      * @param awardId 奖品id
      * @return 奖品id
      */
-    public abstract DefaultTreeFactory.StrategyAwardVO raffleLogicTree(String userId, Long strategyId, Integer awardId);
+    public abstract DefaultTreeFactory.StrategyAwardVO raffleLogicTree(String userId, Long strategyId, Integer awardId, Date endDatetime);
 
 }

@@ -1,8 +1,12 @@
 package cn.bugstack.infrastructure.persistent.po;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -12,6 +16,9 @@ import java.util.Date;
  * @since 2024-08-04
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RaffleActivityAccountDay implements Serializable {
 
     /**
@@ -53,4 +60,9 @@ public class RaffleActivityAccountDay implements Serializable {
      * 更新时间
      */
     private Date updateTime;
+
+    public static String currentDay(){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(new Date());
+    }
 }

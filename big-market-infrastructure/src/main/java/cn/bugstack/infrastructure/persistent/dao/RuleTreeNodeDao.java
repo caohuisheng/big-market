@@ -15,4 +15,5 @@ public interface RuleTreeNodeDao {
 
     List<RuleTreeNode> queryRuleTreeNodeList(String treeId);
 
+    List<RuleTreeNode> queryRuleLocks(String[] treeIds);
 }

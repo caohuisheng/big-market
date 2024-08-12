@@ -7,8 +7,10 @@ import cn.bugstack.domain.award.repository.IAwardRepository;
 import cn.bugstack.infrastructure.event.EventPublisher;
 import cn.bugstack.infrastructure.persistent.dao.TaskDao;
 import cn.bugstack.infrastructure.persistent.dao.UserAwardRecordDao;
+import cn.bugstack.infrastructure.persistent.dao.UserRaffleOrderDao;
 import cn.bugstack.infrastructure.persistent.po.Task;
 import cn.bugstack.infrastructure.persistent.po.UserAwardRecord;
+import cn.bugstack.infrastructure.persistent.po.UserRaffleOrder;
 import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import cn.bugstack.middleware.db.router.strategy.IDBRouterStrategy;
 import cn.bugstack.types.enums.ResponseCode;
@@ -41,6 +43,8 @@ public class AwardRepository implements IAwardRepository {
     private TransactionTemplate transactionTemplate;
     @Resource
     private EventPublisher eventPublisher;
+    @Resource
+    private UserRaffleOrderDao userRaffleOrderDao;
 
     @Override
     public void saveUserAwardRecord(UserAwardRecordAggregate userAwardRecordAggregate) {
@@ -49,6 +53,7 @@ public class AwardRepository implements IAwardRepository {
         String userId = userAwardRecordEntity.getUserId();
         Long activityId = userAwardRecordEntity.getActivityId();
         Integer awardId = userAwardRecordEntity.getAwardId();
+        String orderId = userAwardRecordEntity.getOrderId();
 
         //构建中奖记录
         UserAwardRecord userAwardRecord = new UserAwardRecord();
@@ -63,13 +68,22 @@ public class AwardRepository implements IAwardRepository {
         task.setState(taskEntity.getState().getCode());
 
         try {
-            dbRouter.doRouter("userId");
+            dbRouter.doRouter(userId);
             transactionTemplate.execute(status -> {
                 try {
                     //写入记录
                     userAwardRecordDao.insert(userAwardRecord);
                     //写入任务
                     taskDao.insert(task);
+                    // 更新抽奖订单状态（完成）
+                    UserRaffleOrder userRaffleOrderReq = UserRaffleOrder.builder()
+                            .userId(userId)
+                            .orderId(orderId).build();
+                    int success = userRaffleOrderDao.updateUserRaffleOrderUsed(userRaffleOrderReq);
+                    if(1 != success){
+                        log.info("更新抽奖订单异常 userId:{} orderId:{}", userId, orderId);
+                        throw new AppException(ResponseCode.USER_RAFFLE_ORDER_ERROR.getCode(), ResponseCode.USER_RAFFLE_ORDER_ERROR.getInfo());
+                    }
                     return 1;
                 } catch (Exception e) {
                     status.setRollbackOnly();
@@ -86,6 +100,7 @@ public class AwardRepository implements IAwardRepository {
             eventPublisher.publish(taskEntity.getTopic(), taskEntity.getMessage());
             //更新数据库记录，task任务表
             taskDao.updateTaskSendMessageCompleted(task.getUserId(), task.getMessageId());
+
         } catch (Exception e) {
             log.error("写入中将记录，发送MQ消息失败 userId:{} topic:{}", userId, task.getTopic());
             taskDao.updateTaskSendMessageFail(task.getUserId(), task.getMessageId());

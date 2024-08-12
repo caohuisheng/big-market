@@ -15,7 +15,7 @@ import java.util.List;
 public interface RaffleActivityOrderDao {
 
     @DBRouter(key = "userId")
-    void insert(RaffleActivityOrder raffleActivityOrder);
+    void insert(RaffleActivityOrder raffleActivityOrderReq);
 
     @DBRouter
     List<RaffleActivityOrder> queryRaffleActivityOrderByUserId(String userId);

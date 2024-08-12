@@ -23,7 +23,7 @@ import javax.annotation.Resource;
  * @CreateTime: 2024-07-07
  */
 @Slf4j
-public abstract class AbstractRaffleStrategy_old implements IRaffleStrategy {
+public abstract class AbstractRaffleStrategy_old {
 
     @Resource
     private IStrategyRepository repository;
@@ -53,12 +53,12 @@ public abstract class AbstractRaffleStrategy_old implements IRaffleStrategy {
     protected abstract RuleActionEntity<RuleActionEntity.RaffleCenterEntity> doCheckRaffleCenterLogic(
             RaffleFactorEntity raffleFactorEntity,String[] ruleModelArr);
 
-    @Override
+    //@Override
     public RaffleAwardEntity performRaffle(RaffleFactorEntity raffleFactorEntity) {
         //1.参数校验
         String userId = raffleFactorEntity.getUserId();
         Long strategyId = raffleFactorEntity.getStrategyId();
-        Integer awardId = raffleFactorEntity.getAwardId();
+        //Integer awardId = raffleFactorEntity.getAwardId();
         if(null == strategyId || StringUtils.isBlank(userId)){
             throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(),ResponseCode.ILLEGAL_PARAMETER.getInfo());
         }
@@ -95,7 +95,7 @@ public abstract class AbstractRaffleStrategy_old implements IRaffleStrategy {
         StrategyAwardRuleModelVO strategyAwardRuleModelVO = repository.queryStrategyAwardRuleModels(strategyId, randomAwardId);
 
         // 6.抽奖中 - 规则过滤
-        raffleFactorEntity.setAwardId(randomAwardId);
+        //raffleFactorEntity.setAwardId(randomAwardId);
         RuleActionEntity<RuleActionEntity.RaffleCenterEntity> centerRuleActionEntity = this.doCheckRaffleCenterLogic(
                 raffleFactorEntity, strategyAwardRuleModelVO.raffleCenterRuleModelList());
 
