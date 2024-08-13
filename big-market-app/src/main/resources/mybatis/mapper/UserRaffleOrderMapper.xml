@@ -24,7 +24,7 @@
     </select>
 
     <update id="updateUserRaffleOrderUsed" parameterType="cn.bugstack.infrastructure.persistent.po.UserRaffleOrder">
-        update user_raffle_order set order_state = "used" where order_state = 'create' and user_id = #{userId} order_id = #{orderId}
+        update user_raffle_order set order_state = "used" where order_state = 'create' and user_id = #{userId} and order_id = #{orderId}
     </update>
 
 </mapper>

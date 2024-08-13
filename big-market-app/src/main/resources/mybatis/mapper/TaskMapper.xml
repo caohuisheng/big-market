@@ -25,13 +25,13 @@
         values(#{userId}, #{topic}, #{messageId}, #{message}, #{state})
     </insert>
 
-    <update id="updateTaskSendMessageCompleted">
+    <update id="updateTaskSendMessageCompleted" parameterType="cn.bugstack.infrastructure.persistent.po.Task">
         update task
         set state = 'completed'
         where user_id = #{userId} and message_id = #{messageId}
     </update>
 
-    <update id="updateTaskSendMessageFail">
+    <update id="updateTaskSendMessageFail" parameterType="cn.bugstack.infrastructure.persistent.po.Task">
         update task
         set state = 'fail'
         where user_id = #{userId} and message_id = #{messageId}

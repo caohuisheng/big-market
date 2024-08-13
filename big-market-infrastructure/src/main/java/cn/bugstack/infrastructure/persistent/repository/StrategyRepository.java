@@ -239,9 +239,9 @@ public class StrategyRepository implements IStrategyRepository {
             return false;
         }
 
+        //加锁为了兜底，如果后续有恢复库存，也不会超卖（因为所有可用key都被加锁了）
         String lockKey = cacheKey + Constants.UNDERLINE + surplus;
         boolean status;
-
         if(null != endDatetime){
             long expireTime = endDatetime.getTime() - System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
             status = redisService.setNx(lockKey, expireTime, TimeUnit.MILLISECONDS);

@@ -16,11 +16,11 @@ public interface TaskDao {
 
     void insert(Task task);
 
-    @DBRouter
-    void updateTaskSendMessageCompleted(String userId, String messageId);
+    @DBRouter(key = "userId")
+    void updateTaskSendMessageCompleted(Task taskReq);
 
-    @DBRouter
-    void updateTaskSendMessageFail(String userId, String messageId);
+    @DBRouter(key = "userId")
+    void updateTaskSendMessageFail(Task taskReq);
 
     List<Task> queryNoSendMessageTaskList();
 }
