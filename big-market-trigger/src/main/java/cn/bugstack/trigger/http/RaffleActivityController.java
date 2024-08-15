@@ -6,6 +6,9 @@ import cn.bugstack.domain.activity.service.armory.IActivityArmory;
 import cn.bugstack.domain.award.model.entity.UserAwardRecordEntity;
 import cn.bugstack.domain.award.model.vo.AwardStateVO;
 import cn.bugstack.domain.award.service.IAwardService;
+import cn.bugstack.domain.rebate.model.entity.BehaviorEntity;
+import cn.bugstack.domain.rebate.model.vo.BehaviorTypeVO;
+import cn.bugstack.domain.rebate.service.BehaviorRebateService;
 import cn.bugstack.domain.strategy.model.entity.RaffleAwardEntity;
 import cn.bugstack.domain.strategy.model.entity.RaffleFactorEntity;
 import cn.bugstack.domain.strategy.service.IRaffleStrategy;
@@ -21,7 +24,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Author: chs
@@ -44,6 +49,8 @@ public class RaffleActivityController implements IRaffleActivityService {
     private IActivityArmory activityArmory;
     @Resource
     private IStrategyArmory strategyArmory;
+    @Resource
+    private BehaviorRebateService behaviorRebateService;
 
     /**
      * 活动装配 - 数据预热 | 把活动配置的对应的sku一起预热
@@ -126,6 +133,39 @@ public class RaffleActivityController implements IRaffleActivityService {
             return Response.<ActivityDrawResponseDTO>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
                     .info(ResponseCode.UN_ERROR.getInfo())
+                    .build();
+        }
+    }
+
+    @Override
+    @RequestMapping(value = "calendar_sign_rebate", method = RequestMethod.POST)
+    public Response<Boolean> calendarSignRebate(@RequestParam String userId){
+        try {
+            log.info("日历签到返利开始 userId:{}", userId);
+            BehaviorEntity behaviorEntity = BehaviorEntity.builder()
+                    .userId(userId)
+                    .behaviorTypeVO(BehaviorTypeVO.SIGN)
+                    .outBusinessNo(new SimpleDateFormat("yyyyMMdd").format(new Date()))
+                    .build();
+            List<String> orderIds = behaviorRebateService.createOrder(behaviorEntity);
+            log.info("日历签到返利完成 userId:{} orderIds:{}", userId, orderIds);
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getInfo())
+                    .data(true)
+                    .build();
+        } catch (AppException e) {
+            log.error("日历签到返利异常 userId:{}", userId);
+            return Response.<Boolean>builder()
+                    .code(e.getCode())
+                    .info(e.getInfo())
+                    .build();
+        }catch(Exception e){
+            log.error("日历签到返利异常 userId:{}", userId);
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .data(false)
                     .build();
         }
     }

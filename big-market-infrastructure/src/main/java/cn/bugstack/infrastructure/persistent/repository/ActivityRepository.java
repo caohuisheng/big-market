@@ -125,22 +125,45 @@ public class ActivityRepository implements IActivityRepository {
     @Override
     public void doSaveOrder(CreateOrderAggregate createOrderAggregate) {
         try {
+            String userId = createOrderAggregate.getUserId();
+            Long activityId = createOrderAggregate.getActivityId();
+            Integer totalCount = createOrderAggregate.getTotalCount();
+            Integer monthCount = createOrderAggregate.getMonthCount();
+            Integer dayCount = createOrderAggregate.getDayCount();
             //订单对象
             ActivityOrderEntity activityOrderEntity = createOrderAggregate.getActivityOrderEntity();
             RaffleActivityOrder raffleActivityOrder = new RaffleActivityOrder();
             BeanUtils.copyProperties(activityOrderEntity, raffleActivityOrder);
             raffleActivityOrder.setState(activityOrderEntity.getState().getCode());
-            //账户对象
+            //账户对象 - 总
             RaffleActivityAccount raffleActivityAccount = RaffleActivityAccount.builder()
-                                .userId(createOrderAggregate.getUserId())
-                                .activityId(createOrderAggregate.getActivityId())
-                                .totalCount(createOrderAggregate.getTotalCount())
-                                .totalCountSurplus(createOrderAggregate.getTotalCount())
-                                .dayCount(createOrderAggregate.getDayCount())
-                                .dayCountSurplus(createOrderAggregate.getDayCount())
-                                .monthCount(createOrderAggregate.getMonthCount())
-                                .monthCountSurplus(createOrderAggregate.getMonthCount())
+                                .userId(userId)
+                                .activityId(activityId)
+                                .totalCount(totalCount)
+                                .totalCountSurplus(totalCount)
+                                .dayCount(dayCount)
+                                .dayCountSurplus(dayCount)
+                                .monthCount(monthCount)
+                                .monthCountSurplus(monthCount)
                                 .build();
+
+            //账户对象 - 月
+            RaffleActivityAccountMonth raffleActivityAccountMonth = RaffleActivityAccountMonth.builder()
+                    .userId(userId)
+                    .activityId(activityId)
+                    .month(RaffleActivityAccountMonth.currentMonth())
+                    .monthCount(monthCount)
+                    .monthCountSurplus(monthCount)
+                    .build();
+
+            //账户对象 - 日
+            RaffleActivityAccountDay raffleActivityAccountDay = RaffleActivityAccountDay.builder()
+                    .userId(userId)
+                    .activityId(activityId)
+                    .day(RaffleActivityAccountDay.currentDay())
+                    .dayCount(dayCount)
+                    .dayCountSurplus(dayCount)
+                    .build();
 
             //以用户id为切分键，通过 dbRouter 设定路由
             dbRouter.doRouter(createOrderAggregate.getUserId());
@@ -155,6 +178,9 @@ public class ActivityRepository implements IActivityRepository {
                     if(0 == count){
                         raffleActivityAccountDao.insert(raffleActivityAccount);
                     }
+                    //4.更新账户 - 月、日
+                    raffleActivityAccountMonthDao.addAccountQuota(raffleActivityAccountMonth);
+                    raffleActivityAccountDayDao.addAccountQuota(raffleActivityAccountDay);
                     return 1;
                 } catch (Exception e) {
                     status.setRollbackOnly();

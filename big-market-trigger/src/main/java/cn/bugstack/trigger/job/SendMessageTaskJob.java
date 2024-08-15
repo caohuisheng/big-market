@@ -27,7 +27,59 @@ public class SendMessageTaskJob {
     @Resource
     private IDBRouterStrategy dbRouter;
 
-    @Scheduled(cron = "1/15 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
+    public void exec_db01(){
+        try {
+            //设置库表
+            dbRouter.setDBKey(1);
+            dbRouter.setTBKey(0);
+            //查询未发送的消息
+            List<TaskEntity> taskEntities = taskService.queryNoSendMessageTaskList();
+            if(taskEntities.isEmpty()) return;
+            //发送MQ消息
+            for (TaskEntity taskEntity : taskEntities) {
+                try {
+                    taskService.sendMessage(taskEntity);
+                    taskService.updateTaskSendMessageCompleted(taskEntity.getUserId(), taskEntity.getMessageId());
+                } catch (Exception e) {
+                    log.error("定时任务,发送MQ消息失败 userId:{] topic:{}", taskEntity.getUserId(), taskEntity.getTopic());
+                    taskService.updateTaskSendMessageFail(taskEntity.getUserId(), taskEntity.getTopic());
+                }
+            }
+        }catch(Exception e){
+            log.error("定时任务,扫描MQ任务表发送消息失败", e);
+        } finally {
+            dbRouter.clear();
+        }
+    }
+
+    @Scheduled(cron = "0/10 * * * * ?")
+    public void exec_db02(){
+        try {
+            //设置库表
+            dbRouter.setDBKey(2);
+            dbRouter.setTBKey(0);
+            //查询未发送的消息
+            List<TaskEntity> taskEntities = taskService.queryNoSendMessageTaskList();
+            if(taskEntities.isEmpty()) return;
+            //发送MQ消息
+            for (TaskEntity taskEntity : taskEntities) {
+                try {
+                    taskService.sendMessage(taskEntity);
+                    taskService.updateTaskSendMessageCompleted(taskEntity.getUserId(), taskEntity.getMessageId());
+                } catch (Exception e) {
+                    log.error("定时任务,发送MQ消息失败 userId:{] topic:{}", taskEntity.getUserId(), taskEntity.getTopic());
+                    taskService.updateTaskSendMessageFail(taskEntity.getUserId(), taskEntity.getTopic());
+                }
+            }
+        }catch(Exception e){
+            log.error("定时任务,扫描MQ任务表发送消息失败", e);
+        } finally {
+            dbRouter.clear();
+        }
+    }
+
+    //@Scheduled(cron = "1/15 * * * * ?")
     public void exec(){
         try {
             log.info("定时任务，扫描任务表发送消息");
@@ -63,4 +115,6 @@ public class SendMessageTaskJob {
             dbRouter.clear();
         }
     }
+
+
 }

@@ -19,13 +19,13 @@ import java.util.Date;
 @Component
 public class SendRebateMessageEvent extends BaseEvent<SendRebateMessageEvent.RebateMessage> {
 
-    @Value("spring.rabbitmq.send_rebate")
+    @Value("${spring.rabbitmq.topic.send_rebate}")
     private String topic;
 
     @Override
     public EventMessage<RebateMessage> buildEventMessage(RebateMessage data) {
         return EventMessage.<RebateMessage>builder()
-                .id(RandomStringUtils.randomNumeric(12))
+                .id(RandomStringUtils.randomNumeric(11))
                 .timestamp(new Date())
                 .data(data)
                 .build();

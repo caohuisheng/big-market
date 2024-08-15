@@ -42,7 +42,7 @@ public class BehaviorRebateService implements IBehaviorRebateService {
         List<BehaviorRebateAggregate> behaviorRebateAggregates = new ArrayList<>();
         for (DailyBehaviorRebateVO dailyBehaviorRebateVO : dailyBehaviorRebateVOS) {
             //业务ID：用户ID+返利类型+外部透彻业务ID
-            String bizId = behaviorEntity.getUserId() + Constants.UNDERLINE + dailyBehaviorRebateVO.getRebateType() + behaviorEntity.getOutBusinessNo();
+            String bizId = behaviorEntity.getUserId() + Constants.UNDERLINE + dailyBehaviorRebateVO.getRebateType() + Constants.UNDERLINE + behaviorEntity.getOutBusinessNo();
             BehaviorRebateOrderEntity behaviorRebateOrderEntity = BehaviorRebateOrderEntity.builder()
                     .userId(behaviorEntity.getUserId())
                     .orderId(RandomStringUtils.randomNumeric(12))

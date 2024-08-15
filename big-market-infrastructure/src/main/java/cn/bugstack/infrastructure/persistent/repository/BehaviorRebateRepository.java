@@ -16,6 +16,7 @@ import cn.bugstack.infrastructure.persistent.po.UserBehaviorRebateOrder;
 import cn.bugstack.middleware.db.router.strategy.IDBRouterStrategy;
 import cn.bugstack.types.enums.ResponseCode;
 import cn.bugstack.types.exception.AppException;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -76,11 +77,16 @@ public class BehaviorRebateRepository implements IBehaviorRebateRepository {
                         //任务对象
                         TaskEntity taskEntity = behaviorRebateAggregate.getTaskEntity();
                         Task task = new Task();
+                        task.setUserId(userId);
+                        task.setTopic(taskEntity.getTopic());
+                        task.setMessageId(taskEntity.getMessageId());
+                        task.setMessage(JSON.toJSONString(taskEntity.getMessage()));
+                        task.setState(taskEntity.getState().getCode());
                         taskDao.insert(task);
                     }
                     return 1;
                 } catch (DuplicateKeyException e) {
-                    log.info("写入返利记录，唯一索引冲突 userId:{}",userId, e);
+                    log.error("写入返利记录，唯一索引冲突 userId:{}",userId, e);
                     status.setRollbackOnly();
                     throw new AppException(ResponseCode.INDEX_DUP.getCode(), ResponseCode.INDEX_DUP.getInfo());
                 }

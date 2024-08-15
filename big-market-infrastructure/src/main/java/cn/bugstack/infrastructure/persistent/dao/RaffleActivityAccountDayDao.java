@@ -22,4 +22,6 @@ public interface RaffleActivityAccountDayDao {
 
     @DBRouter(key = "userId")
     Integer queryRaffleActivityAccountDayPartakeCount(RaffleActivityAccountDay raffleActivityAccountDayReq);
+
+    void addAccountQuota(RaffleActivityAccountDay raffleActivityAccountDay);
 }

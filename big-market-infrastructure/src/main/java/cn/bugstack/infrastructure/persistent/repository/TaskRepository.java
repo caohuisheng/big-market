@@ -45,7 +45,7 @@ public class TaskRepository implements ITaskRepository {
     public void updateTaskSendMessageCompleted(String userId, String messageId) {
         Task task = new Task();
         task.setUserId(userId);
-        task.setMessage(messageId);
+        task.setMessageId(messageId);
         taskDao.updateTaskSendMessageCompleted(task);
     }
 

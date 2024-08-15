@@ -18,4 +18,6 @@ public interface RaffleActivityAccountMonthDao {
     RaffleActivityAccountMonth queryActivityAccountMonthByUserId(RaffleActivityAccountMonth activityAccountMonthReq);
 
     int updateActivityAccountMonth(String userId, Long activityId, String month);
+
+    void addAccountQuota(RaffleActivityAccountMonth raffleActivityAccountMonth);
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -59,4 +60,9 @@ public class RaffleActivityAccountMonth implements Serializable {
      * 更新时间
      */
     private Date updateTime;
+
+    public static String currentMonth(){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+        return sdf.format(new Date());
+    }
 }
