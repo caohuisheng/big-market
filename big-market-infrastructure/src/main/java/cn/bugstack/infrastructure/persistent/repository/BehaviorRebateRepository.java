@@ -109,4 +109,18 @@ public class BehaviorRebateRepository implements IBehaviorRebateRepository {
             }
         }
     }
+
+    @Override
+    public BehaviorRebateOrderEntity queryOrderByOutBusinessNo(String userId, String outBusinessNo) {
+        //查询用户行为返利订单
+        UserBehaviorRebateOrder request = new UserBehaviorRebateOrder();
+        request.setUserId(userId);
+        request.setOutBusinessNo(outBusinessNo);
+        UserBehaviorRebateOrder userBehaviorRebateOrder = userBehaviorRebateOrderDao.queryOrderByOutBusinessNo(request);
+        if(null == userBehaviorRebateOrder) return null;
+        //转换为实体对象
+        BehaviorRebateOrderEntity behaviorRebateOrderEntity = new BehaviorRebateOrderEntity();
+        BeanUtils.copyProperties(userBehaviorRebateOrder, behaviorRebateOrderEntity);
+        return behaviorRebateOrderEntity;
+    }
 }

@@ -23,6 +23,12 @@ public interface StrategyAwardDao {
     List<StrategyAward> queryStrategyAwardList();
 
     /**
+     * 根据策略id和奖品id列表查询奖品列表
+     * @return
+     */
+    List<StrategyAward> queryStrategyAwardListByRuleValue(@Param("strategyId") Long strategyId, @Param("awardIds") List<Integer> awardIds);
+
+    /**
      * 根据活动id和奖品id查询单个奖品
      * @param strategyId 策略id
      * @param awardId 奖品id

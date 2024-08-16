@@ -1,9 +1,6 @@
 package cn.bugstack.trigger.api;
 
-import cn.bugstack.trigger.api.dto.RaffleAwardListRequestDTO;
-import cn.bugstack.trigger.api.dto.RaffleAwardListResponseDTO;
-import cn.bugstack.trigger.api.dto.RaffleRequestDTO;
-import cn.bugstack.trigger.api.dto.RaffleResponseDTO;
+import cn.bugstack.trigger.api.dto.*;
 import cn.bugstack.types.model.Response;
 
 import java.util.List;
@@ -28,6 +25,13 @@ public interface IRaffleStrategyService {
      * @return 奖品列表
      */
     Response<List<RaffleAwardListResponseDTO>> queryRaffleAwardList(RaffleAwardListRequestDTO requestDTO);
+
+    /**
+     * 查询抽奖策略权重规则，给用户展示出抽奖N次后必中奖范围
+     * @param request 请求对象
+     * @return 权重奖品配置列表
+     */
+    Response<List<RaffleStrategyRuleWeightResponseDTO>> queryRaffleStrategyRuleWeight(RaffleStrategyRuleWeightRequestDTO request);
 
     /**
      * 随机抽奖接口

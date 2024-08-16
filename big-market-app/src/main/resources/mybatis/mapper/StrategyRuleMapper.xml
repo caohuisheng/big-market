@@ -21,7 +21,7 @@
         select * from strategy_rule where strategy_id = #{strategyId} and rule_model = #{ruleModel}
     </select>
 
-    <select id="queryStrategyRuleValue" resultType="java.lang.String">
+    <select id="queryStrategyRuleValue" parameterType="cn.bugstack.infrastructure.persistent.po.StrategyRule" resultType="java.lang.String">
         select rule_value from strategy_rule
         where strategy_id = #{strategyId}
           <if test="awardId != null">

@@ -1,5 +1,7 @@
 package cn.bugstack.domain.rebate.service;
 
+import cn.bugstack.domain.activity.model.entity.ActivityAccountEntity;
+import cn.bugstack.domain.activity.repository.IActivityRepository;
 import cn.bugstack.domain.rebate.model.aggregate.BehaviorRebateAggregate;
 import cn.bugstack.domain.rebate.model.entity.BehaviorEntity;
 import cn.bugstack.domain.rebate.model.entity.BehaviorRebateOrderEntity;
@@ -30,6 +32,8 @@ public class BehaviorRebateService implements IBehaviorRebateService {
     private IBehaviorRebateRepository behaviorRebateRepository;
     @Resource
     private SendRebateMessageEvent sendRebateMessageEvent;
+    @Resource
+    private IActivityRepository activityRepository;
 
     @Override
     public List<String> createOrder(BehaviorEntity behaviorEntity) {
@@ -50,6 +54,7 @@ public class BehaviorRebateService implements IBehaviorRebateService {
                     .rebateDesc(dailyBehaviorRebateVO.getRebateDesc())
                     .rebateType(dailyBehaviorRebateVO.getRebateType())
                     .rebateConfig(dailyBehaviorRebateVO.getRebateConfig())
+                    .outBusinessNo(behaviorEntity.getOutBusinessNo())
                     .bizId(bizId)
                     .build();
             orderIds.add(behaviorRebateOrderEntity.getOrderId());
@@ -90,4 +95,14 @@ public class BehaviorRebateService implements IBehaviorRebateService {
         return orderIds;
     }
 
+    @Override
+    public Boolean isCalendarSignRebate(String userId, String outBusinessNo) {
+        BehaviorRebateOrderEntity behaviorRebateOrderEntity = behaviorRebateRepository.queryOrderByOutBusinessNo(userId, outBusinessNo);
+        return behaviorRebateOrderEntity != null;
+    }
+
+    @Override
+    public ActivityAccountEntity queryActivityAccountEntity(String userId, Long activityId) {
+        return activityRepository.queryActivityAccountByUserId(userId, activityId);
+    }
 }

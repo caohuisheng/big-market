@@ -5,6 +5,7 @@ import cn.bugstack.domain.strategy.model.entity.StrategyEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyRuleEntity;
 import cn.bugstack.domain.strategy.model.valobj.*;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
+import cn.bugstack.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
 import cn.bugstack.infrastructure.persistent.dao.*;
 import cn.bugstack.infrastructure.persistent.po.*;
 import cn.bugstack.infrastructure.persistent.redis.IRedisService;
@@ -160,7 +161,11 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Override
     public String queryStrategyRuleValue(Long strategyId, Integer awardId, String ruleModel) {
-        return strategyRuleDao.queryStrategyRuleValue(strategyId, awardId, ruleModel);
+        StrategyRule strategyRuleReq = new StrategyRule();
+        strategyRuleReq.setStrategyId(strategyId);
+        strategyRuleReq.setAwardId(awardId);
+        strategyRuleReq.setRuleValue(ruleModel);
+        return strategyRuleDao.queryStrategyRuleValue(strategyRuleReq);
     }
 
     @Override
@@ -286,5 +291,48 @@ public class StrategyRepository implements IStrategyRepository {
             resultMap.put(ruleTreeNode.getTreeId(), Integer.parseInt(ruleTreeNode.getRuleValue()));
         }
         return resultMap;
+    }
+
+    @Override
+    public List<RuleWeightVO> queryAwardRuleWeight(Long strategyId) {
+        //首先从缓存中查询
+        String cacheKey = Constants.RedisKey.STRATEGY_RULE_WEIGHT_KEY + strategyId;
+        List<RuleWeightVO> ruleWeightVOS = redisService.getValue(cacheKey);
+        if(null != ruleWeightVOS) return ruleWeightVOS;
+
+        //1.查询权重规则配置
+        StrategyRule strategyRuleReq = new StrategyRule();
+        strategyRuleReq.setStrategyId(strategyId);
+        strategyRuleReq.setRuleModel(DefaultChainFactory.LogicModel.RULE_WEIGHT.getCode());
+        String ruleValue = strategyRuleDao.queryStrategyRuleValue(strategyRuleReq);
+
+        //2.将规则值转换为map结构（score-awardIds）
+        StrategyRuleEntity strategyRuleEntity = new StrategyRuleEntity();
+        strategyRuleEntity.setRuleValue(ruleValue);
+        strategyRuleEntity.setRuleModel(DefaultChainFactory.LogicModel.RULE_WEIGHT.getCode());
+        Map<String, List<Integer>> scoreToAwards = strategyRuleEntity.getScoreToAwards();
+
+        //3.遍历规则组装奖品配置
+        ruleWeightVOS = new ArrayList<>();
+        for(String score:scoreToAwards.keySet()){
+            List<Integer> awardIds = scoreToAwards.get(score);
+            List<StrategyAward> strategyAwards = strategyAwardDao.queryStrategyAwardListByRuleValue(strategyId, awardIds);
+            List<RuleWeightVO.Award> awards = strategyAwards.stream().map(strategyAward -> {
+                return RuleWeightVO.Award.builder()
+                        .awardId(strategyAward.getAwardId())
+                        .awardTitle(strategyAward.getAwardTitle())
+                        .build();
+            }).collect(Collectors.toList());
+            ruleWeightVOS.add(RuleWeightVO.builder()
+                    .weight(Integer.parseInt(score))
+                    .ruleValue(ruleValue)
+                    .awardIds(awardIds)
+                    .awardList(awards)
+                    .build());
+        }
+        //将结果保存到缓存
+        redisService.setValue(cacheKey, ruleWeightVOS);
+
+        return ruleWeightVOS;
     }
 }

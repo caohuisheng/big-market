@@ -24,6 +24,8 @@ public class UserBehaviorRebateOrder {
     private String rebateType;
     //返利配置
     private String rebateConfig;
+    //业务防重ID
+    private String outBusinessNo;
     //业务ID
     private String bizId;
     //创建时间

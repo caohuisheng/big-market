@@ -31,6 +31,6 @@ public interface StrategyRuleDao {
      * 查询规则值
      * @return
      */
-    String queryStrategyRuleValue(@Param("strategyId") Long strategyId,@Param("awardId") Integer awardId,@Param("ruleModel") String ruleModel);
+    String queryStrategyRuleValue(StrategyRule strategyRuleReq);
 
 }

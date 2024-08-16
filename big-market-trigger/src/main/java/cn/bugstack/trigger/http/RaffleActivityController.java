@@ -1,5 +1,6 @@
 package cn.bugstack.trigger.http;
 
+import cn.bugstack.domain.activity.model.entity.ActivityAccountEntity;
 import cn.bugstack.domain.activity.model.entity.UserRaffleOrderEntity;
 import cn.bugstack.domain.activity.service.IRaffleActivityPartakeService;
 import cn.bugstack.domain.activity.service.armory.IActivityArmory;
@@ -16,14 +17,19 @@ import cn.bugstack.domain.strategy.service.armory.IStrategyArmory;
 import cn.bugstack.trigger.api.IRaffleActivityService;
 import cn.bugstack.trigger.api.dto.ActivityDrawRequestDTO;
 import cn.bugstack.trigger.api.dto.ActivityDrawResponseDTO;
+import cn.bugstack.trigger.api.dto.UserActivityAccountRequestDTO;
+import cn.bugstack.trigger.api.dto.UserActivityAccountResponseDTO;
 import cn.bugstack.types.enums.ResponseCode;
 import cn.bugstack.types.exception.AppException;
 import cn.bugstack.types.model.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -38,6 +44,8 @@ import java.util.List;
 @CrossOrigin("${app.config.cross-origin}")
 @RequestMapping("/api/${app.config.api-version}/raffle/activity/")
 public class RaffleActivityController implements IRaffleActivityService {
+
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 
     @Resource
     private IRaffleActivityPartakeService raffleActivityPartakeService;
@@ -145,7 +153,7 @@ public class RaffleActivityController implements IRaffleActivityService {
             BehaviorEntity behaviorEntity = BehaviorEntity.builder()
                     .userId(userId)
                     .behaviorTypeVO(BehaviorTypeVO.SIGN)
-                    .outBusinessNo(new SimpleDateFormat("yyyyMMdd").format(new Date()))
+                    .outBusinessNo(dateFormat.format(new Date()))
                     .build();
             List<String> orderIds = behaviorRebateService.createOrder(behaviorEntity);
             log.info("日历签到返利完成 userId:{} orderIds:{}", userId, orderIds);
@@ -170,4 +178,53 @@ public class RaffleActivityController implements IRaffleActivityService {
         }
     }
 
+    @Override
+    @RequestMapping(value = "is_calendar_sign_rebate", method = RequestMethod.GET)
+    public Response<Boolean> isCalendarSignRebate(String userId) {
+        try {
+            log.info("查询用户是否完成日历签到返利开始 userId:{}", userId);
+            Boolean isCalendarSignRebate = behaviorRebateService.isCalendarSignRebate(userId, dateFormat.format(new Date()));
+            log.info("查询用户是否完成日历签到返利结束 userId:{} isCalendarSignRebate:{}", userId, isCalendarSignRebate);
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getInfo())
+                    .data(isCalendarSignRebate)
+                    .build();
+        } catch (Exception e) {
+            log.info("查询用户是否完成日历签到返利失败 userId:{}", userId,e);
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .build();
+        }
+    }
+
+    @Override
+    public Response<UserActivityAccountResponseDTO> queryUserActivityAccount(UserActivityAccountRequestDTO request) {
+        String userId = request.getUserId();
+        Long activityId = request.getActivityId();
+        try {
+            //参数校验
+            if(StringUtils.isBlank(userId) || null == activityId) {
+                throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(), ResponseCode.ILLEGAL_PARAMETER.getInfo());
+            }
+
+            log.info("查询用户活动账户开始 userId:{} activityId:{}",userId, activityId);
+            ActivityAccountEntity activityAccountEntity = behaviorRebateService.queryActivityAccountEntity(userId, activityId);
+            UserActivityAccountResponseDTO userActivityAccountResponseDTO = new UserActivityAccountResponseDTO();
+            BeanUtils.copyProperties(activityAccountEntity, userActivityAccountResponseDTO);
+            log.info("查询用户活动账户完成 userId:{} activityId:{} dto:{}",userId, activityId, userActivityAccountResponseDTO);
+            return Response.<UserActivityAccountResponseDTO>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getInfo())
+                    .data(userActivityAccountResponseDTO)
+                    .build();
+        } catch (BeansException e) {
+            log.error("查询用户活动账户失败 userId:{} activityId:{} dto:{}",userId, activityId, e);
+            return Response.<UserActivityAccountResponseDTO>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .build();
+        }
+    }
 }

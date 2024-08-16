@@ -14,7 +14,7 @@ public interface RaffleActivityAccountDao {
 
     void insert(RaffleActivityAccount raffleActivityAccount);
 
-    @DBRouter(key = "userId")
+    @DBRouter
     RaffleActivityAccount queryActivityAccountByUserId(RaffleActivityAccount activityAccountReq);
 
     int updateAccountQuota(RaffleActivityAccount raffleActivityAccount);
