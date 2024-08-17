@@ -50,7 +50,7 @@ public class RuleWeightLogicChain extends AbstractLogicChain {
         if(null != targetScore){
             Integer randomAwardId = strategyDispatch.getRandomAwardId(strategyId, String.valueOf(targetScore));
             log.info("抽奖责任链-权重接管 userId:{}, strategyId:{}, ruleModel:{}, awardId:{}", userId, strategyId, ruleModel(), randomAwardId);
-            return new DefaultChainFactory.StrategyAwardVO(randomAwardId, ruleModel());
+            return new DefaultChainFactory.StrategyAwardVO(randomAwardId, ruleModel(), null);
         }
 
         log.info("抽奖责任链-权重放行 userId:{}, strategyId:{}, ruleModel:{}", userId, strategyId, ruleModel());

@@ -14,4 +14,9 @@ import java.util.List;
 @Mapper
 public interface AwardDao {
     List<Award> queryAwardList();
+
+    String queryAwardConfigById(Integer awardId);
+
+    String queryAwardKey(Integer awardId);
+
 }

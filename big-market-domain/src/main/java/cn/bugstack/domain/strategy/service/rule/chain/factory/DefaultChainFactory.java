@@ -59,8 +59,12 @@ public class DefaultChainFactory {
     @Data
     @AllArgsConstructor
     public static class StrategyAwardVO{
+        //奖品id
         private Integer awardId;
+        //抽奖类型(黑名单抽奖、权重抽奖、默认抽奖)
         private String logicModel;
+        //抽奖规则
+        private String awardRuleValue;
     }
 
     @Getter

@@ -39,7 +39,7 @@ public class BlacklistLogicChain extends AbstractLogicChain {
         // 判断当前用户是否在黑名单用户列表中
         if(Arrays.asList(userBlackIds).contains(userId)){
             log.info("抽奖责任链-黑名单接管 userId:{}, strategyId:{}, ruleModel:{}, awardId:{}", userId, strategyId, ruleModel(), awardId);
-            return new DefaultChainFactory.StrategyAwardVO(awardId, ruleModel());
+            return new DefaultChainFactory.StrategyAwardVO(awardId, ruleModel(), "0.01,1");
         }
 
         log.info("抽奖责任链-黑名单放行 userId:{}, strategyId:{}, ruleModel:{}", userId, strategyId, ruleModel());

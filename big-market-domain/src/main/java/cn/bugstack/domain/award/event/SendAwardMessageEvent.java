@@ -43,9 +43,13 @@ public class SendAwardMessageEvent extends BaseEvent<SendAwardMessageEvent.SendA
     public static class SendAwardMessage{
         //用户id
         private String userId;
+        //订单id
+        private String orderId;
         //奖品id
         private Integer awardId;
         //奖品标题
         private String awardTitle;
+        //奖品配置
+        private String awardConfig;
     }
 }

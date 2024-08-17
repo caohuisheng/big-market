@@ -164,7 +164,7 @@ public class StrategyRepository implements IStrategyRepository {
         StrategyRule strategyRuleReq = new StrategyRule();
         strategyRuleReq.setStrategyId(strategyId);
         strategyRuleReq.setAwardId(awardId);
-        strategyRuleReq.setRuleValue(ruleModel);
+        strategyRuleReq.setRuleModel(ruleModel);
         return strategyRuleDao.queryStrategyRuleValue(strategyRuleReq);
     }
 

@@ -90,4 +90,5 @@ public class RaffleActivityAccountQuotaService extends AbstractRaffleActivityAcc
         ActivityAccountEntity activityAccountEntity = activityRepository.queryActivityAccountByUserId(userId, activityId);
         return activityAccountEntity.getTotalCount() - activityAccountEntity.getTotalCountSurplus();
     }
+
 }

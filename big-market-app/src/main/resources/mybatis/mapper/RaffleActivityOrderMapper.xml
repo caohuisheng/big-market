@@ -15,4 +15,12 @@
         SELECT * FROM award
     </select>
 
+    <select id="queryAwardConfigById" parameterType="integer" resultType="string">
+        select award_config from award where award_id = #{awardId}
+    </select>
+
+    <select id="queryAwardKey" parameterType="integer" resultType="string">
+        select award_key from award where award_id = #{awardId}
+    </select>
+
 </mapper>
