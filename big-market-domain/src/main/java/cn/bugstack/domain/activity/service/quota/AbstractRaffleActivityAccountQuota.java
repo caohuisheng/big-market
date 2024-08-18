@@ -1,17 +1,20 @@
 package cn.bugstack.domain.activity.service.quota;
 
-import cn.bugstack.domain.activity.model.aggregate.CreateOrderAggregate;
+import cn.bugstack.domain.activity.model.aggregate.CreateQuotaOrderAggregate;
 import cn.bugstack.domain.activity.model.entity.ActivityCountEntity;
 import cn.bugstack.domain.activity.model.entity.ActivityEntity;
 import cn.bugstack.domain.activity.model.entity.ActivitySkuEntity;
 import cn.bugstack.domain.activity.model.entity.SkuRechargeEntity;
 import cn.bugstack.domain.activity.repository.IActivityRepository;
 import cn.bugstack.domain.activity.service.IRaffleActivityAccountQuotaService;
+import cn.bugstack.domain.activity.service.quota.policy.ITradePolicy;
 import cn.bugstack.domain.activity.service.quota.rule.IActionChain;
 import cn.bugstack.domain.activity.service.quota.rule.factory.DefaultActivityChainFactory;
 import cn.bugstack.types.enums.ResponseCode;
 import cn.bugstack.types.exception.AppException;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
 
 /**
  * Author: chs
@@ -20,8 +23,11 @@ import org.apache.commons.lang3.StringUtils;
  */
 public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityAccountQuotaSupport implements IRaffleActivityAccountQuotaService {
 
-    public AbstractRaffleActivityAccountQuota(IActivityRepository activityRepository, DefaultActivityChainFactory defaultActivityChainFactory){
+    private Map<String, ITradePolicy> tradePolicyMap;
+
+    public AbstractRaffleActivityAccountQuota(IActivityRepository activityRepository, DefaultActivityChainFactory defaultActivityChainFactory, Map<String, ITradePolicy> tradePolicyMap){
         super(activityRepository, defaultActivityChainFactory);
+        this.tradePolicyMap = tradePolicyMap;
     }
 
     @Override
@@ -47,17 +53,20 @@ public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityA
         boolean success = actionChain.action(activitySkuEntity, activityEntity, activityCountEntity);
 
         //4.构建订单聚合规则
-        CreateOrderAggregate createOrderAggregate = buildOrderAggregate(skuRechargeEntity, activitySkuEntity, activityEntity, activityCountEntity);
+        CreateQuotaOrderAggregate createOrderAggregate = buildOrderAggregate(skuRechargeEntity, activitySkuEntity, activityEntity, activityCountEntity);
 
         // 5.保存订单
-        doSaveOrder(createOrderAggregate);
+        //doSaveOrder(createOrderAggregate);
+        ITradePolicy tradePolicy = tradePolicyMap.get(skuRechargeEntity.getOrderTradeType().getCode());
+        tradePolicy.trade(createOrderAggregate);
 
         //6.返回单号
         return createOrderAggregate.getActivityOrderEntity().getOrderId();
     }
 
-    protected abstract CreateOrderAggregate buildOrderAggregate(SkuRechargeEntity skuRechargeEntity, ActivitySkuEntity activitySkuEntity,
-                                                                ActivityEntity activityEntity, ActivityCountEntity activityCountEntity);
+    protected abstract CreateQuotaOrderAggregate buildOrderAggregate(SkuRechargeEntity skuRechargeEntity, ActivitySkuEntity activitySkuEntity,
+                                                                     ActivityEntity activityEntity, ActivityCountEntity activityCountEntity);
 
-    protected abstract void doSaveOrder(CreateOrderAggregate createOrderAggregate);
+    protected abstract void doSaveOrder(CreateQuotaOrderAggregate createOrderAggregate);
+
 }

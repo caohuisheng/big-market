@@ -1,5 +1,6 @@
 package cn.bugstack.domain.activity.model.entity;
 
+import cn.bugstack.domain.activity.model.valobj.OrderTradeTypeVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,4 +22,6 @@ public class SkuRechargeEntity {
     private Long sku;
     //幂等业务号（外部谁充值谁透传，从而保证幂等）
     private String outBusinessNo;
+
+    private OrderTradeTypeVO orderTradeType;
 }

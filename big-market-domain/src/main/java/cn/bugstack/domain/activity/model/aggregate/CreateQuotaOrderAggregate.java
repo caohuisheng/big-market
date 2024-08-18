@@ -1,17 +1,18 @@
 package cn.bugstack.domain.activity.model.aggregate;
 
 import cn.bugstack.domain.activity.model.entity.ActivityOrderEntity;
+import cn.bugstack.domain.activity.model.valobj.OrderStateVO;
 import lombok.Builder;
 import lombok.Data;
 
 /**
  * Author: chs
- * Description: 下单聚合对象
+ * Description: 账户额度下单聚合对象
  * CreateTime: 2024-07-29
  */
 @Data
 @Builder
-public class CreateOrderAggregate {
+public class CreateQuotaOrderAggregate {
 
     /**
      * 用户ID
@@ -42,4 +43,8 @@ public class CreateOrderAggregate {
      * 活动订单实体
      */
     private ActivityOrderEntity activityOrderEntity;
+
+    public void setActivityOrderState(OrderStateVO orderState){
+        this.activityOrderEntity.setState(orderState);
+    }
 }
