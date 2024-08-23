@@ -22,6 +22,6 @@ public class SkuRechargeEntity {
     private Long sku;
     //幂等业务号（外部谁充值谁透传，从而保证幂等）
     private String outBusinessNo;
-
+    //订单交易类型
     private OrderTradeTypeVO orderTradeType;
 }

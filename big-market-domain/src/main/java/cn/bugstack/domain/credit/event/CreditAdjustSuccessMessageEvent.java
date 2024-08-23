@@ -43,9 +43,13 @@ public class CreditAdjustSuccessMessageEvent extends BaseEvent<CreditAdjustSucce
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CreditAdjustSuccessMessage{
+        //用户id
         private String userId;
+        //订单id
         private String orderId;
+        //金额
         private BigDecimal amount;
+        //外部透传业务id
         private String outBusinessNo;
     }
 

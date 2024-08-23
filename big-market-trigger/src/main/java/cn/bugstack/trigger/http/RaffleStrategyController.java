@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @CrossOrigin("${app.config.cross-origin}")
-@RequestMapping("/api/${app.config.api-version}/raffle/")
+@RequestMapping("/api/${app.config.api-version}/raffle/strategy/")
 public class RaffleStrategyController implements IRaffleStrategyService {
 
     @Resource
@@ -50,7 +50,7 @@ public class RaffleStrategyController implements IRaffleStrategyService {
 
     @Override
     @RequestMapping(value = "strategy_armory", method = RequestMethod.GET)
-    public Response<Boolean> strategyArmory(Long strategyId){
+    public Response<Boolean> strategyArmory(@RequestParam Long strategyId){
         try{
             log.info("抽奖策略装配开始 strategyId:{}", strategyId);
             boolean armoryStatus = strategyArmory.assembleLotteryStrategy(strategyId);
@@ -75,13 +75,14 @@ public class RaffleStrategyController implements IRaffleStrategyService {
     public Response<List<RaffleAwardListResponseDTO>> queryRaffleAwardList(@RequestBody RaffleAwardListRequestDTO requestDTO) {
         String userId = requestDTO.getUserId();
         Long activityId = requestDTO.getActivityId();
+        System.out.println("abc");
         try {
             log.info("查询抽奖奖品列表开始 userId:{} activityId:{}", userId, activityId);
             //1.参数校验
             if(StringUtils.isBlank(userId) || null == activityId){
                 throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(), ResponseCode.ILLEGAL_PARAMETER.getInfo());
             }
-            //2.查询奖品配置
+            //2.查询策略奖品列表
             List<StrategyAwardEntity> strategyAwardEntities = raffleAward.queryRaffleStrategyAwardListByActivityId(activityId);
             //3.获取规则配置
             String[] treeIds = strategyAwardEntities.stream().map(StrategyAwardEntity::getRuleModels).toArray(String[]::new);
@@ -95,8 +96,8 @@ public class RaffleStrategyController implements IRaffleStrategyService {
                 RaffleAwardListResponseDTO raffleAwardListResponseDTO = new RaffleAwardListResponseDTO();
                 BeanUtils.copyProperties(strategyAward, raffleAwardListResponseDTO);
                 raffleAwardListResponseDTO.setAwardRuleLockCount(awardRuleLockCount);
-                raffleAwardListResponseDTO.setIsAwardUnlock(null != dayPartakeCount && dayPartakeCount >= awardRuleLockCount);
-                raffleAwardListResponseDTO.setWaitUnLockCount((null != dayPartakeCount && dayPartakeCount >= awardRuleLockCount) ? 0:(awardRuleLockCount - dayPartakeCount));
+                raffleAwardListResponseDTO.setIsAwardUnlock(awardRuleLockCount == null?true:(dayPartakeCount >= awardRuleLockCount));
+                raffleAwardListResponseDTO.setWaitUnLockCount(awardRuleLockCount == null?null : (dayPartakeCount >= awardRuleLockCount) ? 0:(awardRuleLockCount - dayPartakeCount));
                 return raffleAwardListResponseDTO;
             }).collect(Collectors.toList());
 
@@ -153,7 +154,8 @@ public class RaffleStrategyController implements IRaffleStrategyService {
     }
 
     @Override
-    public Response<List<RaffleStrategyRuleWeightResponseDTO>> queryRaffleStrategyRuleWeight(RaffleStrategyRuleWeightRequestDTO request) {
+    @RequestMapping(value = "query_raffle_strategy_rule_weight", method = RequestMethod.POST)
+    public Response<List<RaffleStrategyRuleWeightResponseDTO>> queryRaffleStrategyRuleWeight(@RequestBody RaffleStrategyRuleWeightRequestDTO request) {
         String userId = request.getUserId();
         Long activityId = request.getActivityId();
         try {

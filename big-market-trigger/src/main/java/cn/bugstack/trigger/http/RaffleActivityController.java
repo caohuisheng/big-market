@@ -1,12 +1,19 @@
 package cn.bugstack.trigger.http;
 
-import cn.bugstack.domain.activity.model.entity.ActivityAccountEntity;
-import cn.bugstack.domain.activity.model.entity.UserRaffleOrderEntity;
+import cn.bugstack.domain.activity.model.entity.*;
+import cn.bugstack.domain.activity.model.valobj.OrderTradeTypeVO;
 import cn.bugstack.domain.activity.service.IRaffleActivityPartakeService;
+import cn.bugstack.domain.activity.service.IRaffleActivitySkuProductService;
 import cn.bugstack.domain.activity.service.armory.IActivityArmory;
+import cn.bugstack.domain.activity.service.quota.RaffleActivityAccountQuotaService;
 import cn.bugstack.domain.award.model.entity.UserAwardRecordEntity;
 import cn.bugstack.domain.award.model.vo.AwardStateVO;
 import cn.bugstack.domain.award.service.IAwardService;
+import cn.bugstack.domain.credit.model.entity.CreditAccountEntity;
+import cn.bugstack.domain.credit.model.entity.TradeEntity;
+import cn.bugstack.domain.credit.model.vo.TradeNameVO;
+import cn.bugstack.domain.credit.model.vo.TradeTypeVO;
+import cn.bugstack.domain.credit.service.CreditAdjustService;
 import cn.bugstack.domain.rebate.model.entity.BehaviorEntity;
 import cn.bugstack.domain.rebate.model.vo.BehaviorTypeVO;
 import cn.bugstack.domain.rebate.service.BehaviorRebateService;
@@ -15,22 +22,24 @@ import cn.bugstack.domain.strategy.model.entity.RaffleFactorEntity;
 import cn.bugstack.domain.strategy.service.IRaffleStrategy;
 import cn.bugstack.domain.strategy.service.armory.IStrategyArmory;
 import cn.bugstack.trigger.api.IRaffleActivityService;
-import cn.bugstack.trigger.api.dto.ActivityDrawRequestDTO;
-import cn.bugstack.trigger.api.dto.ActivityDrawResponseDTO;
-import cn.bugstack.trigger.api.dto.UserActivityAccountRequestDTO;
-import cn.bugstack.trigger.api.dto.UserActivityAccountResponseDTO;
+import cn.bugstack.trigger.api.dto.*;
 import cn.bugstack.types.enums.ResponseCode;
 import cn.bugstack.types.exception.AppException;
 import cn.bugstack.types.model.Response;
+import com.alibaba.fastjson.JSON;
+import com.sun.xml.internal.fastinfoset.algorithm.BooleanEncodingAlgorithm;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -59,6 +68,12 @@ public class RaffleActivityController implements IRaffleActivityService {
     private IStrategyArmory strategyArmory;
     @Resource
     private BehaviorRebateService behaviorRebateService;
+    @Resource
+    private RaffleActivityAccountQuotaService raffleActivityAccountQuotaService;
+    @Resource
+    private CreditAdjustService creditAdjustService;
+    @Resource
+    private IRaffleActivitySkuProductService raffleActivitySkuProductService;
 
     /**
      * 活动装配 - 数据预热 | 把活动配置的对应的sku一起预热
@@ -89,7 +104,7 @@ public class RaffleActivityController implements IRaffleActivityService {
 
     @RequestMapping(value = "draw", method = RequestMethod.POST)
     @Override
-    public Response<ActivityDrawResponseDTO> draw(ActivityDrawRequestDTO requestDTO) {
+    public Response<ActivityDrawResponseDTO> draw(@RequestBody ActivityDrawRequestDTO requestDTO) {
         String userId = requestDTO.getUserId();
         Long activityId = requestDTO.getActivityId();
         try {
@@ -181,7 +196,7 @@ public class RaffleActivityController implements IRaffleActivityService {
 
     @Override
     @RequestMapping(value = "is_calendar_sign_rebate", method = RequestMethod.GET)
-    public Response<Boolean> isCalendarSignRebate(String userId) {
+    public Response<Boolean> isCalendarSignRebate(@RequestParam String userId) {
         try {
             log.info("查询用户是否完成日历签到返利开始 userId:{}", userId);
             Boolean isCalendarSignRebate = behaviorRebateService.isCalendarSignRebate(userId, dateFormat.format(new Date()));
@@ -200,8 +215,9 @@ public class RaffleActivityController implements IRaffleActivityService {
         }
     }
 
+    @RequestMapping(value = "query_user_activity_account", method = RequestMethod.POST)
     @Override
-    public Response<UserActivityAccountResponseDTO> queryUserActivityAccount(UserActivityAccountRequestDTO request) {
+    public Response<UserActivityAccountResponseDTO> queryUserActivityAccount(@RequestBody UserActivityAccountRequestDTO request) {
         String userId = request.getUserId();
         Long activityId = request.getActivityId();
         try {
@@ -223,6 +239,107 @@ public class RaffleActivityController implements IRaffleActivityService {
         } catch (BeansException e) {
             log.error("查询用户活动账户失败 userId:{} activityId:{} dto:{}",userId, activityId, e);
             return Response.<UserActivityAccountResponseDTO>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .build();
+        }
+    }
+
+    @RequestMapping(value = "credit_pay_exchange_sku", method = RequestMethod.POST)
+    @Override
+    public Response<Boolean> creditPayExchangeSku(@RequestBody SkuProductShoppingCartRequestDTO request) {
+        String userId = request.getUserId();
+        Long sku = request.getSku();
+        try {
+            log.info("积分兑换商品开始 userId:{} sku:{}", userId, sku);
+            //1.创建兑换商品sku订单
+            UnpaidActivityOrderEntity unpaidActivityOrder = raffleActivityAccountQuotaService.createOrder(SkuRechargeEntity.builder()
+                    .userId(userId)
+                    .sku(sku)
+                    .outBusinessNo(RandomStringUtils.randomNumeric(12))
+                    .orderTradeType(OrderTradeTypeVO.credit_pay_trade)
+                    .build());
+            log.info("积分兑换商品，创建订单完成 userId:{} sku:{} outBusinessNo:{}", userId, sku, unpaidActivityOrder.getOutBusinessNo());
+
+            //2.支付兑换商品
+            String orderId = creditAdjustService.createOrder(TradeEntity.builder()
+                    .userId(userId)
+                    .tradeName(TradeNameVO.CONVERT_SKU)
+                    .tradeType(TradeTypeVO.REVERSE)
+                    .amount(unpaidActivityOrder.getPayAmount().negate())
+                    .outBusinessNo(unpaidActivityOrder.getOutBusinessNo())
+                    .build());
+            log.info("积分兑换商品，支付订单完成 userId:{} sku:{} orderId:{}", userId, sku, orderId);
+
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getInfo())
+                    .data(true)
+                    .build();
+        } catch (Exception e) {
+            log.info("积分兑换商品失败 userId:{} sku:{}", userId, sku, e);
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .data(false)
+                    .build();
+        }
+    }
+
+    @Override
+    @RequestMapping(value = "query_sku_product_entities", method = RequestMethod.POST)
+    public Response<List<SkuProductResponseDTO>> querySkuProductListByActivityId(@RequestParam Long activityId) {
+        try {
+            log.info("查询sku商品集合开始 activityId:{}", activityId);
+            if(null == activityId){
+                throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(), ResponseCode.ILLEGAL_PARAMETER.getInfo());
+            }
+
+            //查询sku商品集合
+            List<SkuProductEntity> skuProductEntities = raffleActivitySkuProductService.querySkuProductEntitiesByActivityId(activityId);
+            //封装结果
+            List<SkuProductResponseDTO> skuProductResponseDTOS = new ArrayList<>();
+            for(SkuProductEntity skuProduct:skuProductEntities){
+                SkuProductResponseDTO dto = new SkuProductResponseDTO();
+                BeanUtils.copyProperties(skuProduct, dto);
+
+                SkuProductResponseDTO.ActivityCount activityCount = new SkuProductResponseDTO.ActivityCount();
+                BeanUtils.copyProperties(skuProduct.getActivityCount(), activityCount);
+                dto.setActivityCount(activityCount);
+                skuProductResponseDTOS.add(dto);
+            }
+
+            log.info("查询sku商品集合完成 activityId:{} skuProductResponseDTOS:{}", activityId, JSON.toJSONString(skuProductEntities));
+            return Response.<List<SkuProductResponseDTO>>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getInfo())
+                    .data(skuProductResponseDTOS)
+                    .build();
+        } catch (Exception e) {
+            log.info("查询sku商品集合异常 activityId:{}", activityId);
+            return Response.<List<SkuProductResponseDTO>>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .build();
+        }
+    }
+
+    @RequestMapping(value = "query_user_credit_account", method = RequestMethod.POST)
+    @Override
+    public Response<BigDecimal> queryUserCreditAccount(@RequestParam String userId) {
+        try {
+            log.info("查询用户积分值开始 userId:{}", userId);
+            CreditAccountEntity creditAccountEntity = creditAdjustService.queryUserCreditAccount(userId);
+            BigDecimal adjustAmount = creditAccountEntity.getAdjustAmount();
+            log.info("查询用户积分值结束 userId:{} adjustAmount:{}", userId, adjustAmount);
+            return Response.<BigDecimal>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getInfo())
+                    .data(adjustAmount)
+                    .build();
+        } catch (Exception e) {
+            log.info("查询用户积分值异常 userId:{}", userId);
+            return Response.<BigDecimal>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
                     .info(ResponseCode.UN_ERROR.getInfo())
                     .build();

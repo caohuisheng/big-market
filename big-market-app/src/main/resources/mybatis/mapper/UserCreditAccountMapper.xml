@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.bugstack.infrastructure.persistent.dao.UserCreditAccountDao">
 
-    <resultMap id="DataMap" type="cn.bugstack.infrastructure.persistent.po.UserCreditAccount">
+    <resultMap id="dataMap" type="cn.bugstack.infrastructure.persistent.po.UserCreditAccount">
         <result column="user_id" property="userId"/>
         <result column="total_amount" property="totalAmount"/>
         <result column="available_amount" property="availableAmount"/>
@@ -21,5 +21,9 @@
         insert into user_credit_account(user_id, total_amount, available_amount, account_status)
         values(#{userId}, #{totalAmount}, #{availableAmount}, #{accountStatus})
     </insert>
+
+    <select id="queryUserCreditAccount" parameterType="cn.bugstack.infrastructure.persistent.po.UserCreditAccount" resultMap="dataMap">
+        select * from user_credit_account where user_id = #{userId}
+    </select>
 
 </mapper>

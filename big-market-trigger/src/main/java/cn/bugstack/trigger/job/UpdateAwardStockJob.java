@@ -23,7 +23,7 @@ public class UpdateAwardStockJob {
     @Resource
     private IRaffleStock raffleStock;
 
-    @Scheduled(cron = "0/15 * * * * ?")
+    @Scheduled(cron = "0/20 * * * * ?")
     public void exec(){
         try {
             log.info("定时任务，更新奖品库存【延迟队列获取，降低对数据库的更新频次，避免产生竞争】");

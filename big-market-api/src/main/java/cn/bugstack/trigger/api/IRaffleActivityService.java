@@ -1,11 +1,12 @@
 package cn.bugstack.trigger.api;
 
-import cn.bugstack.trigger.api.dto.ActivityDrawRequestDTO;
-import cn.bugstack.trigger.api.dto.ActivityDrawResponseDTO;
-import cn.bugstack.trigger.api.dto.UserActivityAccountRequestDTO;
-import cn.bugstack.trigger.api.dto.UserActivityAccountResponseDTO;
+import cn.bugstack.trigger.api.dto.*;
 import cn.bugstack.types.model.Response;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * Author: chs
@@ -47,4 +48,24 @@ public interface IRaffleActivityService {
      */
     Response<UserActivityAccountResponseDTO> queryUserActivityAccount(UserActivityAccountRequestDTO request);
 
+    /**
+     * 积分兑换商品
+     * @param request
+     * @return
+     */
+    Response<Boolean> creditPayExchangeSku(@RequestBody SkuProductShoppingCartRequestDTO request);
+
+    /**
+     * 根据活动id查询sku商品集合
+     * @param activityId
+     * @return
+     */
+    Response<List<SkuProductResponseDTO>> querySkuProductListByActivityId(Long activityId);
+
+    /**
+     * 查询用户积分账户
+     * @param userId
+     * @return
+     */
+    Response<BigDecimal> queryUserCreditAccount(String userId);
 }

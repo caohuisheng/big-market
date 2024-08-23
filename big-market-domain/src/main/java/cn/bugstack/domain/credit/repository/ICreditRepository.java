@@ -1,6 +1,7 @@
 package cn.bugstack.domain.credit.repository;
 
 import cn.bugstack.domain.credit.model.aggregate.TradeAggregate;
+import cn.bugstack.domain.credit.model.entity.CreditAccountEntity;
 
 /**
  * Author: chs
@@ -9,6 +10,12 @@ import cn.bugstack.domain.credit.model.aggregate.TradeAggregate;
  */
 public interface ICreditRepository {
 
+    /**
+     * 保存用户积分交易订单
+     * @param tradeAggregate 交易聚合对象
+     */
     void saveUserCreditTradeOrder(TradeAggregate tradeAggregate);
+
+    CreditAccountEntity queryUserCreditAccount(String userId);
 
 }

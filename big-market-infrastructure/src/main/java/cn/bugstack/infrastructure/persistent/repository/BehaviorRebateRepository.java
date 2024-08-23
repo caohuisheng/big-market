@@ -85,13 +85,15 @@ public class BehaviorRebateRepository implements IBehaviorRebateRepository {
                         taskDao.insert(task);
                     }
                     return 1;
-                } catch (DuplicateKeyException e) {
-                    log.error("写入返利记录异常，唯一索引冲突 userId:{}",userId, e);
+                }catch(DuplicateKeyException e){
+                    log.error("写入返利记录唯一索引异常 userId:{}",userId, e);
                     status.setRollbackOnly();
+                    throw new AppException(ResponseCode.INDEX_DUP.getCode());
                 }catch(Exception e){
                     log.error("写入返利记录异常 userId:{}",userId, e);
+                    status.setRollbackOnly();
+                    throw e;
                 }
-                return 1;
             });
         } finally {
             dbRouter.clear();

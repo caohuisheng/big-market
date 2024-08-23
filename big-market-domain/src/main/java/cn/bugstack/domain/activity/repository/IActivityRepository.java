@@ -26,6 +26,10 @@ public interface IActivityRepository {
 
     void doSaveCreditPayOrder(CreateQuotaOrderAggregate createQuotaOrderAggregate);
 
+    /**
+     * 保存返利兑换订单
+     * @param createQuotaOrderAggregate
+     */
     void doSaveNoPayOrder(CreateQuotaOrderAggregate createQuotaOrderAggregate);
 
     boolean subtractionActivitySkuStock(Long sku, String cacheKey, Date endDate);
@@ -57,5 +61,9 @@ public interface IActivityRepository {
     ActivityAccountEntity queryActivityAccountEntity(String userId, Long activityId);
 
     void updateOrder(DeliveryOrderEntity deliveryOrderEntity);
+
+    UnpaidActivityOrderEntity queryUnpaidActivityOrder(SkuRechargeEntity skuRechargeEntity);
+
+    List<SkuProductEntity> querySkuProductEntitiesByActivityId(Long activityId);
 
 }

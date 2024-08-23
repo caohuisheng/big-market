@@ -26,6 +26,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -267,7 +268,7 @@ public class ActivityRepository implements IActivityRepository {
                     .build();
 
             //以用户id为切分键，通过 dbRouter 设定路由
-            dbRouter.doRouter(createQuotaOrderAggregate.getUserId());
+            dbRouter.doRouter(userId);
             //编程式事务
             transactionTemplate.execute(status -> {
                 try {
@@ -283,11 +284,16 @@ public class ActivityRepository implements IActivityRepository {
                     raffleActivityAccountMonthDao.addAccountQuota(raffleActivityAccountMonth);
                     raffleActivityAccountDayDao.addAccountQuota(raffleActivityAccountDay);
                     return 1;
-                } catch (Exception e) {
+                } catch (AppException e) {
                     status.setRollbackOnly();
                     log.error("写入订单记录，唯一索引冲突 userId:{} activityId:{} sku:{}", activityOrderEntity.getUserId(),
                             activityOrderEntity.getActivityId(), activityOrderEntity.getSku(),e);
                     throw new AppException(ResponseCode.INDEX_DUP.getCode());
+                }catch(Exception e){
+                    status.setRollbackOnly();
+                    log.error("写入订单记录异常 userId:{} activityId:{} sku:{}", activityOrderEntity.getUserId(),
+                            activityOrderEntity.getActivityId(), activityOrderEntity.getSku(),e);
+                    throw e;
                 }
             });
         } finally {
@@ -522,7 +528,7 @@ public class ActivityRepository implements IActivityRepository {
         //获取账户更新锁
         RLock lock = redisService.getLock(Constants.RedisKey.ACTIVITY_ACCOUNT_UPDATE_LOCK + userId);
         try {
-            lock.lock(3, TimeUnit.SECONDS);
+            lock.lock(5, TimeUnit.SECONDS);
             //查询抽奖活动订单
             RaffleActivityOrder raffleActivityOrderReq = new RaffleActivityOrder();
             raffleActivityOrderReq.setUserId(userId);
@@ -585,7 +591,7 @@ public class ActivityRepository implements IActivityRepository {
                     //2.更新账户 - 日
                     raffleActivityAccountDayDao.addAccountQuota(raffleActivityAccountDay);
                     return 1;
-                } catch (DuplicateKeyException e) {
+                } catch (Exception e) {
                     status.setRollbackOnly();
                     log.error("更新订单记录，唯一索引冲突 userId:{} outBusinessNo:{}", userId, outBusinessNo);
                     throw new AppException(ResponseCode.INDEX_DUP.getCode(), e);
@@ -667,5 +673,33 @@ public class ActivityRepository implements IActivityRepository {
         return activityAccountEntity;
     }
 
+    @Override
+    public UnpaidActivityOrderEntity queryUnpaidActivityOrder(SkuRechargeEntity skuRechargeEntity) {
+        RaffleActivityOrder raffleActivityOrderReq = new RaffleActivityOrder();
+        raffleActivityOrderReq.setUserId(skuRechargeEntity.getUserId());
+        raffleActivityOrderReq.setSku(skuRechargeEntity.getSku());
+        return raffleActivityOrderDao.queryUnpaidActivityOrder(raffleActivityOrderReq);
+    }
 
+    @Override
+    public List<SkuProductEntity> querySkuProductEntitiesByActivityId(Long activityId) {
+        //查询所有抽奖活动sku
+        List<RaffleActivitySku> raffleActivitySkus = raffleActivitySkuDao.queryActivitySkuByActivityId(activityId);
+        //sku商品列表
+        List<SkuProductEntity> skuProductEntities = new ArrayList<>(raffleActivitySkus.size());
+        for(RaffleActivitySku raffleActivitySku:raffleActivitySkus){
+            //查询活动sku对应的活动数量
+            RaffleActivityCount raffleActivityCount = raffleActivityCountDao.queryRaffleActivityCountById(activityId);
+            SkuProductEntity.ActivityCount activityCount = new SkuProductEntity.ActivityCount();
+            BeanUtils.copyProperties(raffleActivityCount, activityCount);
+
+            //填充sku商品
+            SkuProductEntity skuProductEntity = new SkuProductEntity();
+            BeanUtils.copyProperties(raffleActivitySku, skuProductEntity);
+            skuProductEntity.setActivityCount(activityCount);
+            skuProductEntities.add(skuProductEntity);
+        }
+
+        return skuProductEntities;
+    }
 }

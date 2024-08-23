@@ -20,7 +20,7 @@ public class UpdateActivitySkuStockJob {
     @Resource
     private IRaffleActivitySkuStockService skuStock;
 
-    @Scheduled(cron = "0/15 * * * * ?")
+    @Scheduled(cron = "0/20 * * * * ?")
     public void exec(){
         try {
             log.info("定时任务，更新活动sku库存【延迟队列获取，降低对数据库的更新频次，不要产生竞争】");

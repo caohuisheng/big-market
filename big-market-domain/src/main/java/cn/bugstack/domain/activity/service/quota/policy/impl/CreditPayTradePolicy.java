@@ -10,7 +10,7 @@ import javax.annotation.Resource;
 
 /**
  * Author: chs
- * Description:
+ * Description: 积分订单
  * CreateTime: 2024-08-18
  */
 @Service("credit_pay_trade")

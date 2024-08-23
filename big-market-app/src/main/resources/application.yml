@@ -3,3 +3,7 @@ spring:
     name: big-market-app
   profiles:
     active: dev
+  devtools:
+    restart:
+      enabled: true
+      exclude: application.yml

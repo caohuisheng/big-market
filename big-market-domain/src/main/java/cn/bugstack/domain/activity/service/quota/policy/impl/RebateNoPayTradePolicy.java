@@ -8,10 +8,11 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 /**
  * Author: chs
- * Description:
+ * Description: 返利兑换
  * CreateTime: 2024-08-18
  */
 @Service("rebate_no_pay_trade")
@@ -26,4 +27,5 @@ public class RebateNoPayTradePolicy implements ITradePolicy {
         createQuotaOrderAggregate.getActivityOrderEntity().setPayAmount(BigDecimal.ZERO);
         activityRepository.doSaveNoPayOrder(createQuotaOrderAggregate);
     }
+
 }

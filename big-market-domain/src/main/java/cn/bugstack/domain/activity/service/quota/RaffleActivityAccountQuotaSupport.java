@@ -16,12 +16,12 @@ import java.util.Date;
  */
 public class RaffleActivityAccountQuotaSupport {
 
-    protected DefaultActivityChainFactory defaultActivityChainFactor;
+    protected DefaultActivityChainFactory defaultActivityChainFactory;
 
     protected IActivityRepository activityRepository;
 
     public RaffleActivityAccountQuotaSupport(IActivityRepository activityRepository, DefaultActivityChainFactory defaultActivityChainFactor) {
-        this.defaultActivityChainFactor = defaultActivityChainFactor;
+        this.defaultActivityChainFactory = defaultActivityChainFactor;
         this.activityRepository = activityRepository;
     }
 

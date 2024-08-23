@@ -21,7 +21,7 @@ public class RaffleAwardListResponseDTO {
     // 奖品标题
     private String awardTitle;
     // 奖品副标题
-    private String awardSubTitle;
+    private String awardSubtitle;
     // 排序
     private Integer sort;
     // 奖品次数规则 - 抽奖N次后解锁，未配置则为空

@@ -15,6 +15,8 @@ import cn.bugstack.infrastructure.persistent.po.UserCreditOrder;
 import cn.bugstack.infrastructure.persistent.redis.IRedisService;
 import cn.bugstack.middleware.db.router.strategy.IDBRouterStrategy;
 import cn.bugstack.types.common.Constants;
+import cn.bugstack.types.enums.ResponseCode;
+import cn.bugstack.types.exception.AppException;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
@@ -98,12 +100,14 @@ public class CreditRepository implements ICreditRepository {
 
                     //添加任务
                     taskDao.insert(task);
-                } catch (DuplicateKeyException e) {
+                } catch(AppException e){
+                    log.error("调整积分账户额度，唯一索引冲突 userId:{} orderId:{}", userId, userCreditOrder.getOrderId(),e);
                     status.setRollbackOnly();
-                    log.info("调整积分账户额度异常，唯一索引冲突 userId:{} orderId:{}", userId, userCreditOrder.getOrderId(), e);
-                }catch(Exception e){
+                    throw new AppException(ResponseCode.INDEX_DUP.getCode());
+                } catch(Exception e){
+                    log.error("调整积分账户额度异常 userId:{} orderId:{}", userId, userCreditOrder.getOrderId(),e);
                     status.setRollbackOnly();
-                    log.info("调整积分账户额度异常 userId:{} orderId:{}", userId, userCreditOrder.getOrderId(), e);
+                    throw e;
                 }
                 return 1;
             });
@@ -119,7 +123,20 @@ public class CreditRepository implements ICreditRepository {
             taskDao.updateTaskSendMessageCompleted(task);
             log.info("调整积分账户记录，发送消息成功 userId:{} topic:{}", userId, taskEntity.getTopic());
         } catch (Exception e) {
-            log.info("调整积分账户记录，发送消息成功 userId:{} topic:{}", userId, taskEntity.getTopic(), e);
+            log.info("调整积分账户记录，发送消息失败 userId:{} topic:{}", userId, taskEntity.getTopic(), e);
         }
+    }
+
+    @Override
+    public CreditAccountEntity queryUserCreditAccount(String userId) {
+        //查询用户积分账户
+        UserCreditAccount userCreditAccountReq = new UserCreditAccount();
+        userCreditAccountReq.setUserId(userId);
+        UserCreditAccount userCreditAccount = userCreditAccountDao.queryUserCreditAccount(userCreditAccountReq);
+
+        return CreditAccountEntity.builder()
+                .userId(userCreditAccount.getUserId())
+                .adjustAmount(userCreditAccount.getAvailableAmount())
+                .build();
     }
 }

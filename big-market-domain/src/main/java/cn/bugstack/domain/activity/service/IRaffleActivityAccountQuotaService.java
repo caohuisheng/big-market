@@ -2,6 +2,7 @@ package cn.bugstack.domain.activity.service;
 
 import cn.bugstack.domain.activity.model.entity.DeliveryOrderEntity;
 import cn.bugstack.domain.activity.model.entity.SkuRechargeEntity;
+import cn.bugstack.domain.activity.model.entity.UnpaidActivityOrderEntity;
 
 /**
  * 抽奖活动订单接口
@@ -15,7 +16,8 @@ public interface IRaffleActivityAccountQuotaService {
      * @param skuRechargeEntity 活动商品充值实体对象
      * @return 活动ID
      */
-    String createOrder(SkuRechargeEntity skuRechargeEntity);
+    //String createOrder(SkuRechargeEntity skuRechargeEntity);
+    UnpaidActivityOrderEntity createOrder(SkuRechargeEntity skuRechargeEntity);
 
     /**
      * 查询活动账户 - 日参与次数
@@ -25,7 +27,17 @@ public interface IRaffleActivityAccountQuotaService {
      */
     Integer queryRaffleActivityAccountDayPartakeCount(Long activityId, String userId);
 
+    /**
+     * 查询活动账户 - 总参与次数
+     * @param userId 用户id
+     * @param activityId 活动id
+     * @return 参与次数
+     */
     Integer queryRaffleActivityAccountPartakeCount(String userId, Long activityId);
 
+    /**
+     * 订单出货 - 积分充值
+     * @param deliveryOrderEntity 出货实体对象
+     */
     void updateOrder(DeliveryOrderEntity deliveryOrderEntity);
 }

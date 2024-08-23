@@ -45,7 +45,7 @@ public class CreditAdjustService implements ICreditAdjustService {
         //2.创建账户订单实体
         CreditOrderEntity creditOrderEntity = TradeAggregate.createCreditOrderEntity(userId, tradeName, tradeType, amount, outBusinessNo);
 
-        //3.创建任务实体
+        //3.创建积分调整成功消息
         CreditAdjustSuccessMessageEvent.CreditAdjustSuccessMessage creditAdjustSuccessMessage = CreditAdjustSuccessMessageEvent.CreditAdjustSuccessMessage.builder()
                         .userId(userId)
                         .orderId(creditOrderEntity.getOrderId())
@@ -69,5 +69,10 @@ public class CreditAdjustService implements ICreditAdjustService {
         repository.saveUserCreditTradeOrder(tradeAggregate);
         log.info("增加账户积分额度完成 userId:{} orderId:{}", userId, creditOrderEntity.getOrderId());
         return creditOrderEntity.getOrderId();
+    }
+
+    @Override
+    public CreditAccountEntity queryUserCreditAccount(String userId) {
+        return repository.queryUserCreditAccount(userId);
     }
 }
