@@ -5,6 +5,8 @@ import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import cn.bugstack.middleware.db.router.annotation.DBRouterStrategy;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * Author: chs
  * Description: 用户行为返利Dao
@@ -17,5 +19,5 @@ public interface UserBehaviorRebateOrderDao {
     void insert(UserBehaviorRebateOrder userBehaviorRebateOrder);
 
     @DBRouter(key = "userId")
-    UserBehaviorRebateOrder queryOrderByOutBusinessNo(UserBehaviorRebateOrder request);
+    List<UserBehaviorRebateOrder> queryOrderByOutBusinessNo(UserBehaviorRebateOrder request);
 }

@@ -88,9 +88,25 @@ public interface IStrategyRepository {
 
     /**
      * 根据策略id查询奖品规则权重值
-     * @param strategyId
+     * @param strategyId 策略id
      * @return
      */
     List<RuleWeightVO> queryAwardRuleWeight(Long strategyId);
+
+    /**
+     * 查询用户活动账户总抽奖次数
+     * @param userId 用户id
+     * @param strategyId 策略id
+     * @return
+     */
+    Integer queryActivityAccountTotalUseCount(String userId, Long strategyId);
+
+    /**
+     * 查询用户今日抽奖次数
+     * @param userId 用户id
+     * @param strategyId 策略id
+     * @return
+     */
+    Integer queryTodayUserRaffleCount(String userId, Long strategyId);
 
 }

@@ -99,7 +99,7 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
     public abstract DefaultChainFactory.StrategyAwardVO raffleLogicChain(String userId, Long strategyId);
 
     /**
-     * 抽奖计算（规则树象方法）
+     * 抽奖计算（规则树抽象方法）
      * @param userId 用户id
      * @param strategyId 策略id
      * @param awardId 奖品id

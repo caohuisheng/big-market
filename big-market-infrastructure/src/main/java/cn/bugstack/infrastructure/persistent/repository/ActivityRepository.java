@@ -211,8 +211,13 @@ public class ActivityRepository implements IActivityRepository {
                 try {
                     raffleActivityOrderDao.insert(raffleActivityOrder);
                 } catch (DuplicateKeyException e) {
-                    log.error("添加订单记录异常，唯一索引冲突 userId:{} activityId:{} sku:{}", userId, activityId, sku);
+                    log.error("添加积分支付订单记录异常，唯一索引冲突 userId:{} activityId:{} sku:{}", userId, activityId, sku, e);
                     status.setRollbackOnly();
+                    throw new AppException(ResponseCode.INDEX_DUP.getCode());
+                }catch(Exception e){
+                    log.error("添加积分支付订单记录异常 userId:{} activityId:{} sku:{}", userId, activityId, sku, e);
+                    status.setRollbackOnly();
+                    throw e;
                 }
                 return 1;
             });
@@ -689,7 +694,7 @@ public class ActivityRepository implements IActivityRepository {
         List<SkuProductEntity> skuProductEntities = new ArrayList<>(raffleActivitySkus.size());
         for(RaffleActivitySku raffleActivitySku:raffleActivitySkus){
             //查询活动sku对应的活动数量
-            RaffleActivityCount raffleActivityCount = raffleActivityCountDao.queryRaffleActivityCountById(activityId);
+            RaffleActivityCount raffleActivityCount = raffleActivityCountDao.queryRaffleActivityCountById(raffleActivitySku.getActivityCountId());
             SkuProductEntity.ActivityCount activityCount = new SkuProductEntity.ActivityCount();
             BeanUtils.copyProperties(raffleActivityCount, activityCount);
 

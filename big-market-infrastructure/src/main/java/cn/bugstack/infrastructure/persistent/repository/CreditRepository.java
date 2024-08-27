@@ -1,5 +1,6 @@
 package cn.bugstack.infrastructure.persistent.repository;
 
+import cn.bugstack.domain.award.model.vo.AccountStatusVO;
 import cn.bugstack.domain.credit.model.aggregate.TradeAggregate;
 import cn.bugstack.domain.credit.model.entity.CreditAccountEntity;
 import cn.bugstack.domain.credit.model.entity.CreditOrderEntity;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -64,6 +66,7 @@ public class CreditRepository implements ICreditRepository {
         userCreditAccountReq.setUserId(creditAccountEntity.getUserId());
         userCreditAccountReq.setAvailableAmount(creditAccountEntity.getAdjustAmount());
         userCreditAccountReq.setTotalAmount(creditAccountEntity.getAdjustAmount());
+        userCreditAccountReq.setAccountStatus(AccountStatusVO.OPEN.getCode());
 
         //积分订单
         UserCreditOrder userCreditOrder = new UserCreditOrder();
@@ -88,18 +91,29 @@ public class CreditRepository implements ICreditRepository {
             dbRouter.doRouter(userId);
             transactionTemplate.execute(status -> {
                 try {
-                    //更新 || 创建积分账户
-                    int count = userCreditAccountDao.updateAddAmount(userCreditAccountReq);
-                    if(0 == count){
-                        userCreditAccountReq.setAccountStatus("open");
-                        userCreditAccountDao.insert(userCreditAccountReq);
+                    //1.保存账户积分
+                    UserCreditAccount userCreditAccount = userCreditAccountDao.queryUserCreditAccount(userCreditAccountReq);
+                    if(null == userCreditAccount){
+                        userCreditAccountDao.insert(userCreditAccount);
+                    }else{
+                        if(userCreditAccountReq.getAvailableAmount().compareTo(BigDecimal.ZERO) > 0){
+                            userCreditAccountDao.updateAddAmount(userCreditAccountReq);
+                        }else{
+                            int count = userCreditAccountDao.updateSubtractionAmount(userCreditAccountReq);
+                            if(0 == count){
+                                status.setRollbackOnly();
+                                throw new AppException(ResponseCode.USER_CREDIT_ACCOUNT_NO_AVAILABLE_AMOUNT.getCode(),ResponseCode.USER_CREDIT_ACCOUNT_NO_AVAILABLE_AMOUNT.getInfo());
+                            }
+                        }
                     }
 
-                    //新增积分订单
+                    //2.新增积分订单
                     userCreditOrderDao.insert(userCreditOrder);
 
-                    //添加任务
-                    taskDao.insert(task);
+                    //3.添加任务
+                    if(userCreditAccountReq.getAvailableAmount().compareTo(BigDecimal.ZERO)<0){
+                        taskDao.insert(task);
+                    }
                 } catch(AppException e){
                     log.error("调整积分账户额度，唯一索引冲突 userId:{} orderId:{}", userId, userCreditOrder.getOrderId(),e);
                     status.setRollbackOnly();
@@ -116,14 +130,16 @@ public class CreditRepository implements ICreditRepository {
             dbRouter.clear();
         }
 
-        try {
-            //发送消息
-            eventPublisher.publish(taskEntity.getTopic(), taskEntity.getMessage());
-            //更新任务状态
-            taskDao.updateTaskSendMessageCompleted(task);
-            log.info("调整积分账户记录，发送消息成功 userId:{} topic:{}", userId, taskEntity.getTopic());
-        } catch (Exception e) {
-            log.info("调整积分账户记录，发送消息失败 userId:{} topic:{}", userId, taskEntity.getTopic(), e);
+        if(userCreditAccountReq.getAvailableAmount().compareTo(BigDecimal.ZERO)<0){
+            try {
+                //发送消息
+                eventPublisher.publish(taskEntity.getTopic(), taskEntity.getMessage());
+                //更新任务状态
+                taskDao.updateTaskSendMessageCompleted(task);
+                log.info("调整积分账户记录，发送消息成功 userId:{} topic:{}", userId, taskEntity.getTopic());
+            } catch (Exception e) {
+                log.info("调整积分账户记录，发送消息失败 userId:{} topic:{}", userId, taskEntity.getTopic(), e);
+            }
         }
     }
 

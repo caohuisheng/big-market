@@ -42,7 +42,7 @@ public class CreditAdjustService implements ICreditAdjustService {
         //1.创建积分账户实体
         CreditAccountEntity creditAccountEntity = TradeAggregate.createCreditAccountEntity(userId, amount);
 
-        //2.创建账户订单实体
+        //2.创建积分订单实体
         CreditOrderEntity creditOrderEntity = TradeAggregate.createCreditOrderEntity(userId, tradeName, tradeType, amount, outBusinessNo);
 
         //3.创建积分调整成功消息

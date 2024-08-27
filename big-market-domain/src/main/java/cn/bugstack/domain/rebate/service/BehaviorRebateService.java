@@ -97,8 +97,8 @@ public class BehaviorRebateService implements IBehaviorRebateService {
 
     @Override
     public Boolean isCalendarSignRebate(String userId, String outBusinessNo) {
-        BehaviorRebateOrderEntity behaviorRebateOrderEntity = behaviorRebateRepository.queryOrderByOutBusinessNo(userId, outBusinessNo);
-        return behaviorRebateOrderEntity != null;
+        List<BehaviorRebateOrderEntity> behaviorRebateOrderEntities = behaviorRebateRepository.queryOrderByOutBusinessNo(userId, outBusinessNo);
+        return !CollectionUtils.isEmpty(behaviorRebateOrderEntities);
     }
 
     @Override

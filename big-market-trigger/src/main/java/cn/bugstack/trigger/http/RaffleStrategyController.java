@@ -48,6 +48,11 @@ public class RaffleStrategyController implements IRaffleStrategyService {
     @Resource
     private IRaffleActivityAccountQuotaService raffleActivityAccountQuotaService;
 
+    @RequestMapping(value = "test", method = RequestMethod.GET)
+    public Response<String> demo(){
+        return Response.<String>builder().code("200").info("success").data("hello,world").build();
+    }
+
     @Override
     @RequestMapping(value = "strategy_armory", method = RequestMethod.GET)
     public Response<Boolean> strategyArmory(@RequestParam Long strategyId){
@@ -75,7 +80,6 @@ public class RaffleStrategyController implements IRaffleStrategyService {
     public Response<List<RaffleAwardListResponseDTO>> queryRaffleAwardList(@RequestBody RaffleAwardListRequestDTO requestDTO) {
         String userId = requestDTO.getUserId();
         Long activityId = requestDTO.getActivityId();
-        System.out.println("abc");
         try {
             log.info("查询抽奖奖品列表开始 userId:{} activityId:{}", userId, activityId);
             //1.参数校验

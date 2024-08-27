@@ -50,7 +50,7 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
         UserRaffleOrderEntity userRaffleOrderEntity = activityRepository.queryNoUsedRaffleOrder(userId, activityId);
 
         if(null != userRaffleOrderEntity){
-            log.info("使用未被使用的参与活动订单 userId:{} activityId:{} userRaffleOrderEntity",userId, activityId, JSON.toJSONString(userRaffleOrderEntity));
+            log.info("使用未被使用的参与活动订单 userId:{} activityId:{} userRaffleOrderEntity:{}",userId, activityId, JSON.toJSONString(userRaffleOrderEntity));
             userRaffleOrderEntity.setEndDatetime(activityEntity.getEndDateTime()); //设置活动结束时间
             return userRaffleOrderEntity;
         }

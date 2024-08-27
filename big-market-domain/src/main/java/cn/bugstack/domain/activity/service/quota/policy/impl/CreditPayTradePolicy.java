@@ -22,6 +22,6 @@ public class CreditPayTradePolicy implements ITradePolicy {
     @Override
     public void trade(CreateQuotaOrderAggregate createQuotaOrderAggregate) {
         createQuotaOrderAggregate.setActivityOrderState(OrderStateVO.wait_pay);
-        activityRepository.doSaveOrder(createQuotaOrderAggregate);
+        activityRepository.doSaveCreditPayOrder(createQuotaOrderAggregate);
     }
 }

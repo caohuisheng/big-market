@@ -16,6 +16,11 @@ public interface ICreditRepository {
      */
     void saveUserCreditTradeOrder(TradeAggregate tradeAggregate);
 
+    /**
+     * 查询用户积分账户
+     * @param userId 用户id
+     * @return 用户积分账户
+     */
     CreditAccountEntity queryUserCreditAccount(String userId);
 
 }

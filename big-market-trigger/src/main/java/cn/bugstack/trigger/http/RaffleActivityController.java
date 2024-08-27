@@ -2,10 +2,10 @@ package cn.bugstack.trigger.http;
 
 import cn.bugstack.domain.activity.model.entity.*;
 import cn.bugstack.domain.activity.model.valobj.OrderTradeTypeVO;
+import cn.bugstack.domain.activity.service.IRaffleActivityAccountQuotaService;
 import cn.bugstack.domain.activity.service.IRaffleActivityPartakeService;
 import cn.bugstack.domain.activity.service.IRaffleActivitySkuProductService;
 import cn.bugstack.domain.activity.service.armory.IActivityArmory;
-import cn.bugstack.domain.activity.service.quota.RaffleActivityAccountQuotaService;
 import cn.bugstack.domain.award.model.entity.UserAwardRecordEntity;
 import cn.bugstack.domain.award.model.vo.AwardStateVO;
 import cn.bugstack.domain.award.service.IAwardService;
@@ -13,21 +13,25 @@ import cn.bugstack.domain.credit.model.entity.CreditAccountEntity;
 import cn.bugstack.domain.credit.model.entity.TradeEntity;
 import cn.bugstack.domain.credit.model.vo.TradeNameVO;
 import cn.bugstack.domain.credit.model.vo.TradeTypeVO;
-import cn.bugstack.domain.credit.service.CreditAdjustService;
+import cn.bugstack.domain.credit.service.ICreditAdjustService;
 import cn.bugstack.domain.rebate.model.entity.BehaviorEntity;
 import cn.bugstack.domain.rebate.model.vo.BehaviorTypeVO;
-import cn.bugstack.domain.rebate.service.BehaviorRebateService;
+import cn.bugstack.domain.rebate.service.IBehaviorRebateService;
 import cn.bugstack.domain.strategy.model.entity.RaffleAwardEntity;
 import cn.bugstack.domain.strategy.model.entity.RaffleFactorEntity;
+import cn.bugstack.domain.strategy.model.entity.StrategyAwardEntity;
+import cn.bugstack.domain.strategy.model.valobj.RuleWeightVO;
+import cn.bugstack.domain.strategy.service.IRaffleAward;
+import cn.bugstack.domain.strategy.service.IRaffleRule;
 import cn.bugstack.domain.strategy.service.IRaffleStrategy;
 import cn.bugstack.domain.strategy.service.armory.IStrategyArmory;
 import cn.bugstack.trigger.api.IRaffleActivityService;
+import cn.bugstack.trigger.api.IRaffleStrategyService;
 import cn.bugstack.trigger.api.dto.*;
 import cn.bugstack.types.enums.ResponseCode;
 import cn.bugstack.types.exception.AppException;
 import cn.bugstack.types.model.Response;
 import com.alibaba.fastjson.JSON;
-import com.sun.xml.internal.fastinfoset.algorithm.BooleanEncodingAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,16 +41,17 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Author: chs
- * Description:
- * CreateTime: 2024-08-08
+ * Description: 营销抽奖服务
+ * CreateTime: 2024-07-19
  */
 @Slf4j
 @RestController
@@ -67,13 +72,18 @@ public class RaffleActivityController implements IRaffleActivityService {
     @Resource
     private IStrategyArmory strategyArmory;
     @Resource
-    private BehaviorRebateService behaviorRebateService;
+    private IBehaviorRebateService behaviorRebateService;
     @Resource
-    private RaffleActivityAccountQuotaService raffleActivityAccountQuotaService;
+    private IRaffleActivityAccountQuotaService raffleActivityAccountQuotaService;
     @Resource
-    private CreditAdjustService creditAdjustService;
+    private ICreditAdjustService creditAdjustService;
     @Resource
     private IRaffleActivitySkuProductService raffleActivitySkuProductService;
+
+    @RequestMapping(value = "test", method = RequestMethod.GET)
+    public Response<String> demo(){
+        return Response.<String>builder().code("200").info("success").data("hello,world").build();
+    }
 
     /**
      * 活动装配 - 数据预热 | 把活动配置的对应的sku一起预热
@@ -316,7 +326,7 @@ public class RaffleActivityController implements IRaffleActivityService {
                     .data(skuProductResponseDTOS)
                     .build();
         } catch (Exception e) {
-            log.info("查询sku商品集合异常 activityId:{}", activityId);
+            log.info("查询sku商品集合异常 activityId:{}", activityId, e);
             return Response.<List<SkuProductResponseDTO>>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
                     .info(ResponseCode.UN_ERROR.getInfo())
@@ -338,7 +348,7 @@ public class RaffleActivityController implements IRaffleActivityService {
                     .data(adjustAmount)
                     .build();
         } catch (Exception e) {
-            log.info("查询用户积分值异常 userId:{}", userId);
+            log.error("查询用户积分值异常 userId:{}", userId);
             return Response.<BigDecimal>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
                     .info(ResponseCode.UN_ERROR.getInfo())

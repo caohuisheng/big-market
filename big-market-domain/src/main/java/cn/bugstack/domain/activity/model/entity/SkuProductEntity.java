@@ -38,6 +38,7 @@ public class SkuProductEntity {
     /* 活动配置的次数 */
     private ActivityCount activityCount;
 
+    @Data
     public static class ActivityCount{
         //总次数
         private Integer totalCount;

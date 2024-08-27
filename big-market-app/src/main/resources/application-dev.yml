@@ -14,7 +14,6 @@ app:
     # 跨域，开发阶段可以设置为 * 不限制
     cross-origin: '*'
 
-
 # 线程池配置
 thread:
   pool:

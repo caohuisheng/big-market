@@ -14,6 +14,8 @@ public interface UserCreditAccountDao {
 
     int updateAddAmount(UserCreditAccount userCreditAccount);
 
+    int updateSubtractionAmount(UserCreditAccount userCreditAccount);
+
     void insert(UserCreditAccount userCreditAccount);
 
     @DBRouter(key = "userId")

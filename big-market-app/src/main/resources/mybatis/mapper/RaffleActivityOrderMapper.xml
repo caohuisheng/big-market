@@ -36,6 +36,7 @@
     <select id="queryUnpaidActivityOrder" parameterType="cn.bugstack.infrastructure.persistent.po.RaffleActivityOrder" resultType="cn.bugstack.domain.activity.model.entity.UnpaidActivityOrderEntity">
         select user_id, order_id, out_business_no, pay_amount from raffle_activity_order
         where user_id = #{userId} and sku = #{sku} and state = 'wait_pay' and datediff(now(), create_time) &lt;= 30
+        limit 1
     </select>
 
 </mapper>

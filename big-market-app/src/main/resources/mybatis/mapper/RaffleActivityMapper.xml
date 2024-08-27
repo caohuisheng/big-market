@@ -8,9 +8,6 @@
         <result column="activity_desc" property="activityDesc"/>
         <result column="begin_date_time" property="beginDateTime"/>
         <result column="end_date_time" property="endDateTime"/>
-        <result column="stock_count" property="stockCount"/>
-        <result column="stock_count_surplus" property="stockCountSurplus"/>
-        <result column="activity_count_id" property="activityCountId"/>
         <result column="state" property="state"/>
         <result column="strategy_id" property="strategyId"/>
         <result column="create_time" property="createTime"/>
@@ -19,6 +16,10 @@
 
     <select id="queryRaffleActivityById" parameterType="long" resultMap="dataMap">
         select * from raffle_activity where activity_id = #{activityId}
+    </select>
+
+    <select id="queryActivityIdByStrategyId" resultType="long">
+        select activity_id from raffle_activity where strategy_id = #{strategyId}
     </select>
 
 </mapper>

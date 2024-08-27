@@ -1,11 +1,13 @@
 package cn.bugstack.domain.strategy.service.rule.tree.impl;
 
 import cn.bugstack.domain.strategy.model.valobj.RuleLogicCheckTypeVO;
+import cn.bugstack.domain.strategy.repository.IStrategyRepository;
 import cn.bugstack.domain.strategy.service.rule.ILogicTreeNode;
 import cn.bugstack.domain.strategy.service.rule.tree.factory.DefaultTreeFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Date;
 
 /**
@@ -17,8 +19,8 @@ import java.util.Date;
 @Component("rule_lock")
 public class RuleLockLogicTreeNode implements ILogicTreeNode {
 
-    // 用户抽奖次数
-    private Long userRaffleCount = 10L;
+    @Resource
+    private IStrategyRepository strategyRepository;
 
     @Override
     public DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId, String ruleValue, Date endDatetime) {
@@ -31,8 +33,11 @@ public class RuleLockLogicTreeNode implements ILogicTreeNode {
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
+
+        // 查询用户今日抽奖次数
+        Integer totdayUserRaffleCount = strategyRepository.queryTodayUserRaffleCount(userId, strategyId);
         // 如果用户抽奖次数大于规则限定值，规则放行
-        if(userRaffleCount >= targetRaffleCount){
+        if(totdayUserRaffleCount >= targetRaffleCount){
             return DefaultTreeFactory.TreeActionEntity.builder()
                     .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.ALLOW)
                     .build();

@@ -47,6 +47,10 @@ public class StrategyRepository implements IStrategyRepository {
     @Resource
     private RaffleActivityDao raffleActivityDao;
     @Resource
+    private RaffleActivityAccountDao raffleActivityAccountDao;
+    @Resource
+    private RaffleActivityAccountDayDao raffleActivityAccountDayDao;
+    @Resource
     private RuleTreeDao ruleTreeDao;
     @Resource
     private RuleTreeNodeDao ruleTreeNodeDao;
@@ -220,7 +224,7 @@ public class StrategyRepository implements IStrategyRepository {
         BeanUtils.copyProperties(ruleTree, ruleTreeVO);
         ruleTreeVO.setTreeNodeMap(treeNodeVOMap);
         // 将结果保存到缓存中
-        redisService.setValue(cacheKey, ruleTreeVOCache);
+        redisService.setValue(cacheKey, ruleTreeVO);
 
         return ruleTreeVO;
     }
@@ -334,5 +338,25 @@ public class StrategyRepository implements IStrategyRepository {
         redisService.setValue(cacheKey, ruleWeightVOS);
 
         return ruleWeightVOS;
+    }
+
+    @Override
+    public Integer queryActivityAccountTotalUseCount(String userId, Long strategyId) {
+        Long activityId = raffleActivityDao.queryActivityIdByStrategyId(strategyId);
+        RaffleActivityAccount raffleActivityAccount = raffleActivityAccountDao.queryActivityAccountByUserId(RaffleActivityAccount.builder()
+                .userId(userId)
+                .activityId(activityId)
+                .build());
+        return raffleActivityAccount.getTotalCount() - raffleActivityAccount.getTotalCountSurplus();
+    }
+
+    @Override
+    public Integer queryTodayUserRaffleCount(String userId, Long strategyId) {
+        Long activityId = raffleActivityDao.queryActivityIdByStrategyId(strategyId);
+        return raffleActivityAccountDayDao.queryRaffleActivityAccountDayPartakeCount(RaffleActivityAccountDay.builder()
+                .userId(userId)
+                .activityId(activityId)
+                .day(RaffleActivityAccountDay.currentDay())
+                .build());
     }
 }

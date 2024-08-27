@@ -18,6 +18,6 @@ public interface IBehaviorRebateRepository {
 
     void saveUserRebateRecord(String userId, List<BehaviorRebateAggregate> behaviorRebateAggregates);
 
-    BehaviorRebateOrderEntity queryOrderByOutBusinessNo(String userId, String outBusinessNo);
+    List<BehaviorRebateOrderEntity> queryOrderByOutBusinessNo(String userId, String outBusinessNo);
 
 }

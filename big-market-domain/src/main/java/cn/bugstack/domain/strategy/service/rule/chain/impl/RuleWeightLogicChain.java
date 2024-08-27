@@ -29,9 +29,6 @@ public class RuleWeightLogicChain extends AbstractLogicChain {
     @Resource
     private IStrategyDispatch strategyDispatch;
 
-    // 根据用户id查询用户抽奖消耗的积分值
-    public Long userScore = 0L;
-
     @Override
     public DefaultChainFactory.StrategyAwardVO logic(String userId, Long strategyId) {
         log.info("抽奖责任链-权重开始 userId:{}, strategyId:{}, ruleModel:{}", userId, strategyId, ruleModel());
@@ -41,6 +38,8 @@ public class RuleWeightLogicChain extends AbstractLogicChain {
         Map<Long, String> scoreToAwards = getScoreToAwards(ruleValue);
         List<Long> scores = new ArrayList<>(scoreToAwards.keySet());
 
+        // 根据用户id查询用户抽奖消耗的积分值(抽奖总次数)
+        Integer userScore = repository.queryActivityAccountTotalUseCount(userId, strategyId);
         // 找到最后一个比当前消耗积分userScore小的score
         Long targetScore = scores.stream()
                 .filter(score -> userScore >= score)
@@ -50,7 +49,7 @@ public class RuleWeightLogicChain extends AbstractLogicChain {
         if(null != targetScore){
             Integer randomAwardId = strategyDispatch.getRandomAwardId(strategyId, String.valueOf(targetScore));
             log.info("抽奖责任链-权重接管 userId:{}, strategyId:{}, ruleModel:{}, awardId:{}", userId, strategyId, ruleModel(), randomAwardId);
-            return new DefaultChainFactory.StrategyAwardVO(randomAwardId, ruleModel(), null);
+            return new DefaultChainFactory.StrategyAwardVO(randomAwardId, ruleModel(), ruleValue);
         }
 
         log.info("抽奖责任链-权重放行 userId:{}, strategyId:{}, ruleModel:{}", userId, strategyId, ruleModel());

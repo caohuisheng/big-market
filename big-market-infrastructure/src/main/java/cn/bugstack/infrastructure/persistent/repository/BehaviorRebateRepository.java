@@ -24,6 +24,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -115,16 +116,17 @@ public class BehaviorRebateRepository implements IBehaviorRebateRepository {
     }
 
     @Override
-    public BehaviorRebateOrderEntity queryOrderByOutBusinessNo(String userId, String outBusinessNo) {
+    public List<BehaviorRebateOrderEntity> queryOrderByOutBusinessNo(String userId, String outBusinessNo) {
         //查询用户行为返利订单
         UserBehaviorRebateOrder request = new UserBehaviorRebateOrder();
         request.setUserId(userId);
         request.setOutBusinessNo(outBusinessNo);
-        UserBehaviorRebateOrder userBehaviorRebateOrder = userBehaviorRebateOrderDao.queryOrderByOutBusinessNo(request);
-        if(null == userBehaviorRebateOrder) return null;
+        List<UserBehaviorRebateOrder> userBehaviorRebateOrder = userBehaviorRebateOrderDao.queryOrderByOutBusinessNo(request);
         //转换为实体对象
-        BehaviorRebateOrderEntity behaviorRebateOrderEntity = new BehaviorRebateOrderEntity();
-        BeanUtils.copyProperties(userBehaviorRebateOrder, behaviorRebateOrderEntity);
-        return behaviorRebateOrderEntity;
+        return userBehaviorRebateOrder.stream().map(item -> {
+            BehaviorRebateOrderEntity behaviorRebateOrderEntity = new BehaviorRebateOrderEntity();
+            BeanUtils.copyProperties(item, behaviorRebateOrderEntity);
+            return behaviorRebateOrderEntity;
+        }).collect(Collectors.toList());
     }
 }
