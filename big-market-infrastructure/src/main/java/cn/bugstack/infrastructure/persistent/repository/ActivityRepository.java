@@ -332,7 +332,8 @@ public class ActivityRepository implements IActivityRepository {
         //加锁为了兜底，如果后续恢复库存、手动处理等，也不会超卖，因为所有可用库存key都被加锁
         //设置加锁时间为活动截止时间+延迟1天
         String lockKey = cacheKey + Constants.UNDERLINE + surplus;
-        long expireMills = endDate.getTime() - System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
+        // long expireMills = endDate.getTime() - System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
+        long expireMills = TimeUnit.HOURS.toMillis(10);
         Boolean status = redisService.setNx(lockKey, expireMills, TimeUnit.MILLISECONDS);
 
         return status;
@@ -471,14 +472,13 @@ public class ActivityRepository implements IActivityRepository {
                         //不存在当月的月账户，则创建月账户
                         RaffleActivityAccountMonth raffleActivityAccountMonth = new RaffleActivityAccountMonth();
                         BeanUtils.copyProperties(activityAccountMonthEntity, raffleActivityAccountMonth);
-                        raffleActivityAccountMonth.setMonthCountSurplus(raffleActivityAccountMonth.getMonthCountSurplus() - 1);
                         raffleActivityAccountMonthDao.insertActivityAccountMonth(raffleActivityAccountMonth);
                         //新创建月账户，则更新总账户表中月镜像额度
                         raffleActivityAccountDao.updateActivityAccountMonthSurplusImageQuota(
                                 RaffleActivityAccount.builder()
                                         .userId(userId)
                                         .activityId(activityId)
-                                        .monthCountSurplus(activityAccountEntity.getMonthCountSurplus())
+                                        .monthCountSurplus(raffleActivityAccountMonth.getMonthCountSurplus())
                                         .build());
                     }
 
@@ -496,14 +496,14 @@ public class ActivityRepository implements IActivityRepository {
                     }else{
                         RaffleActivityAccountDay raffleActivityAccountDay = new RaffleActivityAccountDay();
                         BeanUtils.copyProperties(activityAccountDayEntity, raffleActivityAccountDay);
-                        raffleActivityAccountDay.setDayCountSurplus(raffleActivityAccountDay.getDayCountSurplus() - 1);
+                        raffleActivityAccountDay.setDayCountSurplus(raffleActivityAccountDay.getDayCountSurplus());
                         raffleActivityAccountDayDao.insertActivityAccountDay(raffleActivityAccountDay);
                         //新创建月账户，则更新总账户表中日镜像额度
                         raffleActivityAccountDao.updateActivityAccountDaySurplusImageQuota(
                                 RaffleActivityAccount.builder()
                                         .userId(userId)
                                         .activityId(activityId)
-                                        .dayCountSurplus(activityAccountEntity.getDayCountSurplus())
+                                        .dayCountSurplus(raffleActivityAccountDay.getDayCountSurplus())
                                         .build()
                         );
                     }

@@ -27,7 +27,7 @@ public class SendMessageTaskJob {
     @Resource
     private IDBRouterStrategy dbRouter;
 
-    @Scheduled(cron = "0/20 * * * * ?")
+    @Scheduled(cron = "0 0/5 * * * ?")
     public void exec_db01(){
         try {
             //设置库表
@@ -53,7 +53,7 @@ public class SendMessageTaskJob {
         }
     }
 
-    @Scheduled(cron = "0/20 * * * * ?")
+    @Scheduled(cron = "0 0/5 * * * ?")
     public void exec_db02(){
         try {
             //设置库表

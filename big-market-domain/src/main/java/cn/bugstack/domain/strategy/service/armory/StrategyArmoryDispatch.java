@@ -31,7 +31,7 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
     private IStrategyRepository repository;
 
     @Override
-    public boolean assembleLotteryStrategyBy(Long activityId) {
+    public boolean assembleLotteryStrategyByActivityId(Long activityId) {
         Long strategyId = repository.queryStrategyIdByActivityId(activityId);
         return assembleLotteryStrategy(strategyId);
     }
@@ -67,7 +67,7 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
             List<Integer> awards = scoreToAwards.get(score);
             List<StrategyAwardEntity> strategyAwardEntitiesClone = new ArrayList<>(strategyAwardEntities);
             strategyAwardEntitiesClone.removeIf(item -> !awards.contains(item.getAwardId()));
-            assembleLotteryStrategy(strategyId+"_"+score, strategyAwardEntitiesClone);
+            assembleLotteryStrategy(strategyId + "_" + score, strategyAwardEntitiesClone);
         }
 
         return true;

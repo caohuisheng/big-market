@@ -20,7 +20,10 @@
 
     <select id="queryNoUsedRaffleOrder" resultMap="DataMap">
         select * from user_raffle_order
-        where user_id = #{userId} and activity_id = #{activityId} and order_state = "create"
+        where user_id = #{userId}
+          and activity_id = #{activityId}
+          and order_state = "create"
+          and now() > date_add(update_time,INTERVAL 60 second)
     </select>
 
     <update id="updateUserRaffleOrderUsed" parameterType="cn.bugstack.infrastructure.persistent.po.UserRaffleOrder">

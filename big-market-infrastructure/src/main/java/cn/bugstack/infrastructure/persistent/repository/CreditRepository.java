@@ -94,7 +94,7 @@ public class CreditRepository implements ICreditRepository {
                     //1.保存账户积分
                     UserCreditAccount userCreditAccount = userCreditAccountDao.queryUserCreditAccount(userCreditAccountReq);
                     if(null == userCreditAccount){
-                        userCreditAccountDao.insert(userCreditAccount);
+                        userCreditAccountDao.insert(userCreditAccountReq);
                     }else{
                         if(userCreditAccountReq.getAvailableAmount().compareTo(BigDecimal.ZERO) > 0){
                             userCreditAccountDao.updateAddAmount(userCreditAccountReq);

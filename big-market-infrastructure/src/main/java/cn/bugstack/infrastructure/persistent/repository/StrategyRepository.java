@@ -252,7 +252,8 @@ public class StrategyRepository implements IStrategyRepository {
         String lockKey = cacheKey + Constants.UNDERLINE + surplus;
         boolean status;
         if(null != endDatetime){
-            long expireTime = endDatetime.getTime() - System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
+            // long expireTime = endDatetime.getTime() - System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
+            long expireTime = TimeUnit.HOURS.toMillis(10);
             status = redisService.setNx(lockKey, expireTime, TimeUnit.MILLISECONDS);
         }else{
             status = redisService.setNx(lockKey);

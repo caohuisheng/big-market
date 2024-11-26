@@ -38,7 +38,7 @@ public class StrategyRuleEntity {
         // 将ruleValue按空格分开
         String[] ruleValueArr = ruleValue.split(Constants.SPACE);
         // 每个积分阈值-可以抽到的奖品列表键值对
-        Map<String, List<Integer>> scoreToAwards = new HashMap<>();
+        Map<String, List<Integer>> scoreToAwards = new LinkedHashMap<>();
         // 遍历每个ruleValue
         for(String rule:ruleValueArr){
             // 将ruleValue氛围score积分和对应的奖品列表id

@@ -185,7 +185,7 @@ public class RaffleStrategyController implements IRaffleStrategyService {
                 }).collect(Collectors.toList());
 
                 RaffleStrategyRuleWeightResponseDTO dto = new RaffleStrategyRuleWeightResponseDTO();
-                dto.setUserActivityAccountTotalCount(userActivityAccountTotalUseCount);
+                dto.setUserActivityAccountTotalUseCount(userActivityAccountTotalUseCount);
                 dto.setRuleWeightCount(ruleWeightVO.getWeight());
                 dto.setStrategyAwards(strategyAwards);
                 raffleStrategyRuleWeightResponseDTOS.add(dto);

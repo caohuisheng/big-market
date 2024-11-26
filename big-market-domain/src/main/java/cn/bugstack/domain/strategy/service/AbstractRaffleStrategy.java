@@ -64,7 +64,6 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
         log.info("抽奖策略计算-责任链 userId:{}, strategyId:{}, awardId:{}, logicModel:{}", userId, strategyId, awardId, logicModel);
         // 如果是黑名单、权重等非默认抽奖，直接返回结果
         if(!DefaultChainFactory.LogicModel.RULE_DEFAULT.getCode().equals(logicModel)){
-            //return RaffleAwardEntity.builder().awardId(awardId).build();
             return buildRaffleAwardEntity(strategyId, awardId, chainStrategyAwardVO.getAwardRuleValue());
         }
 

@@ -35,9 +35,9 @@ public class RuleLockLogicTreeNode implements ILogicTreeNode {
         }
 
         // 查询用户今日抽奖次数
-        Integer totdayUserRaffleCount = strategyRepository.queryTodayUserRaffleCount(userId, strategyId);
+        Integer todayUserRaffleCount = strategyRepository.queryTodayUserRaffleCount(userId, strategyId);
         // 如果用户抽奖次数大于规则限定值，规则放行
-        if(totdayUserRaffleCount >= targetRaffleCount){
+        if(todayUserRaffleCount >= targetRaffleCount){
             return DefaultTreeFactory.TreeActionEntity.builder()
                     .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.ALLOW)
                     .build();

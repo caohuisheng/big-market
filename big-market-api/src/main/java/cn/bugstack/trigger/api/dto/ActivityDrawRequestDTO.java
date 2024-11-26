@@ -14,5 +14,7 @@ public class ActivityDrawRequestDTO {
     private String userId;
     //活动id
     private Long activityId;
+    //抽奖次数
+    private Integer raffleCount;
 
 }

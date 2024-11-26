@@ -9,8 +9,6 @@ import cn.bugstack.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
-import sun.java2d.pipe.SpanShapeRenderer;
-import sun.plugin2.applet.Applet2ExecutionContext;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
@@ -59,7 +57,7 @@ public class RaffleActivityPartakeService extends AbstractRaffleActivityPartake{
             activityAccountMonthEntity.setActivityId(activityId);
             activityAccountMonthEntity.setMonth(month);
             activityAccountMonthEntity.setMonthCount(activityAccountEntity.getMonthCount());
-            activityAccountMonthEntity.setMonthCountSurplus(activityAccountEntity.getMonthCount());
+            activityAccountMonthEntity.setMonthCountSurplus(activityAccountEntity.getMonthCount() - 1);
         }
 
         //查询日账户额度
@@ -76,7 +74,7 @@ public class RaffleActivityPartakeService extends AbstractRaffleActivityPartake{
             activityAccountDayEntity.setActivityId(activityId);
             activityAccountDayEntity.setDay(day);
             activityAccountDayEntity.setDayCount(activityAccountEntity.getDayCount());
-            activityAccountDayEntity.setDayCountSurplus(activityAccountEntity.getDayCount());
+            activityAccountDayEntity.setDayCountSurplus(activityAccountEntity.getDayCount() - 1);
         }
 
         //构建聚合对象

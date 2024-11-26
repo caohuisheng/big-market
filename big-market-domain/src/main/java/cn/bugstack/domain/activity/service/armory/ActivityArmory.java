@@ -45,7 +45,8 @@ public class ActivityArmory implements IActivityArmory, IActivityDispatch {
 
         //预热活动
         activityRepository.queryRaffleActivityById(activityId);
-        return false;
+
+        return true;
     }
 
     @Override

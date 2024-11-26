@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -96,6 +97,7 @@ public class RaffleActivityController implements IRaffleActivityService {
         try {
             log.info("活动装配，数据预热，开始 activityId:{}", activityId);
             activityArmory.assembleActivitySkuByActivityId(activityId);
+            strategyArmory.assembleLotteryStrategyByActivityId(activityId);
             Response<Boolean> response = Response.<Boolean>builder()
                     .code(ResponseCode.SUCCESS.getCode())
                     .info(ResponseCode.SUCCESS.getInfo())
@@ -117,35 +119,14 @@ public class RaffleActivityController implements IRaffleActivityService {
     public Response<ActivityDrawResponseDTO> draw(@RequestBody ActivityDrawRequestDTO requestDTO) {
         String userId = requestDTO.getUserId();
         Long activityId = requestDTO.getActivityId();
+
         try {
             log.info("活动抽奖 userId:{} activityId:{}", userId, activityId);
             //1.参数校验
             if(StringUtils.isBlank(userId) || null == activityId){
                 throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(), ResponseCode.ILLEGAL_PARAMETER.getInfo());
             }
-            //2.参与活动 - 创建参与记录订单
-            UserRaffleOrderEntity raffleOrderEntity = raffleActivityPartakeService.createOrder(userId, activityId);
-            log.info("活动抽奖，创建订单 userId:{} activityId:{} orderId:{}", userId, activityId, raffleOrderEntity.getOrderId());
-            //3.抽奖策略 - 执行抽奖
-            RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(RaffleFactorEntity.builder()
-                    .userId(userId)
-                    .strategyId(raffleOrderEntity.getStrategyId())
-                    .endDatetime(raffleOrderEntity.getEndDatetime())
-                    .build());
-
-            //4.存放结果，写入中奖记录
-            UserAwardRecordEntity userAwardRecordEntity = UserAwardRecordEntity.builder()
-                    .userId(userId)
-                    .activityId(activityId)
-                    .strategyId(raffleOrderEntity.getStrategyId())
-                    .orderId(raffleOrderEntity.getOrderId())
-                    .awardId(raffleAwardEntity.getAwardId())
-                    .awardTitle(raffleAwardEntity.getAwardTitle())
-                    .awardTime(new Date())
-                    .awardState(AwardStateVO.create)
-                    .awardConfig(raffleAwardEntity.getAwardConfig())
-                    .build();
-            awardService.saveUserAwardRecord(userAwardRecordEntity);
+            RaffleAwardEntity raffleAwardEntity = this.draw(userId, activityId);
             //5.返回结果
             return Response.<ActivityDrawResponseDTO>builder()
                     .code(ResponseCode.SUCCESS.getCode())
@@ -169,6 +150,83 @@ public class RaffleActivityController implements IRaffleActivityService {
                     .info(ResponseCode.UN_ERROR.getInfo())
                     .build();
         }
+    }
+
+    @RequestMapping(value = "continuous_draw", method = RequestMethod.POST)
+    public Response<List<ActivityDrawResponseDTO>> continuousDraw(@RequestBody ActivityDrawRequestDTO requestDTO){
+        String userId = requestDTO.getUserId();
+        Long activityId = requestDTO.getActivityId();
+        Integer raffleCount = requestDTO.getRaffleCount();
+
+        try {
+            ExecutorService executorService = Executors.newFixedThreadPool(5);
+            log.info("活动连续抽奖 userId:{}, activityId:{}, raffleCount:{}", userId, activityId, raffleCount);
+            List<RaffleAwardEntity> raffleAwardEntities = new ArrayList<>(raffleCount);
+            CountDownLatch countDownLatch = new CountDownLatch(raffleCount);
+
+            for (int i = 0; i < raffleCount; i++) {
+                executorService.execute(() -> {
+                    RaffleAwardEntity raffleAwardEntity = this.draw(userId, activityId);
+                    raffleAwardEntities.add(raffleAwardEntity);
+                    countDownLatch.countDown();
+                });
+            }
+
+            boolean status = countDownLatch.await(5, TimeUnit.SECONDS);
+            List<ActivityDrawResponseDTO> activityDrawResponseDTOS = raffleAwardEntities.stream().map(raffleAwardEntity -> ActivityDrawResponseDTO.builder()
+                    .awardId(raffleAwardEntity.getAwardId())
+                    .awardTitle(raffleAwardEntity.getAwardTitle())
+                    .awardIndex(raffleAwardEntity.getSort())
+                    .build()).collect(Collectors.toList());
+            if(status){
+                return Response.<List<ActivityDrawResponseDTO>>builder()
+                        .code(ResponseCode.SUCCESS.getCode())
+                        .info(ResponseCode.SUCCESS.getInfo())
+                        .data(activityDrawResponseDTOS)
+                        .build();
+            }else{
+                log.error("活动抽奖失败 userId:{} activityId:{} raffleCount:{}", userId, activityId, raffleCount);
+                return Response.<List<ActivityDrawResponseDTO>>builder()
+                        .code(ResponseCode.UN_ERROR.getCode())
+                        .info(ResponseCode.UN_ERROR.getInfo())
+                        .build();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return Response.<List<ActivityDrawResponseDTO>>builder()
+                    .code(e.getMessage())
+                    .info(e.getMessage())
+                    .build();
+        }
+    }
+
+    private RaffleAwardEntity draw(String userId, Long activityId){
+        int i = 1/0;
+        //2.参与活动 - 创建参与记录订单
+        UserRaffleOrderEntity raffleOrderEntity = raffleActivityPartakeService.createOrder(userId, activityId);
+        log.info("活动抽奖，创建订单 userId:{} activityId:{} orderId:{}", userId, activityId, raffleOrderEntity.getOrderId());
+        //3.抽奖策略 - 执行抽奖
+        RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(RaffleFactorEntity.builder()
+                .userId(userId)
+                .strategyId(raffleOrderEntity.getStrategyId())
+                .endDatetime(raffleOrderEntity.getEndDatetime())
+                .build());
+
+        //4.存放结果，写入中奖记录
+        UserAwardRecordEntity userAwardRecordEntity = UserAwardRecordEntity.builder()
+                .userId(userId)
+                .activityId(activityId)
+                .strategyId(raffleOrderEntity.getStrategyId())
+                .orderId(raffleOrderEntity.getOrderId())
+                .awardId(raffleAwardEntity.getAwardId())
+                .awardTitle(raffleAwardEntity.getAwardTitle())
+                .awardTime(new Date())
+                .awardState(AwardStateVO.create)
+                .awardConfig(raffleAwardEntity.getAwardConfig())
+                .build();
+        awardService.saveUserAwardRecord(userAwardRecordEntity);
+
+        return raffleAwardEntity;
     }
 
     @Override

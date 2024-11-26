@@ -23,19 +23,23 @@ public class UpdateAwardStockJob {
     @Resource
     private IRaffleStock raffleStock;
 
-    @Scheduled(cron = "0/20 * * * * ?")
+    @Scheduled(cron = "0/15 * * * * ?")
     public void exec(){
         try {
-            log.info("定时任务，更新奖品库存【延迟队列获取，降低对数据库的更新频次，避免产生竞争】");
-            StrategyAwardStockKeyVO strategyAwardStockKeyVO = raffleStock.takeQueueValue();
-            if(null == strategyAwardStockKeyVO){
-                return;
-            }
+            // log.info("定时任务，更新奖品库存【延迟队列获取，降低对数据库的更新频次，避免产生竞争】");
+            // 每次获取10个更新奖品库存记录
+            int count = 10;
+            for (int i = 0; i < count; i++) {
+                StrategyAwardStockKeyVO strategyAwardStockKeyVO = raffleStock.takeQueueValue();
+                if(null == strategyAwardStockKeyVO){
+                    return;
+                }
 
-            Long strategyId = strategyAwardStockKeyVO.getStrategyId();
-            Integer awardId = strategyAwardStockKeyVO.getAwardId();
-            log.info("定时任务，更新奖品库存 strategyId:{}, awardId:{}", strategyId, awardId);
-            raffleStock.updateStrategyAwardStock(strategyId, awardId);
+                Long strategyId = strategyAwardStockKeyVO.getStrategyId();
+                Integer awardId = strategyAwardStockKeyVO.getAwardId();
+                log.info("定时任务，更新奖品库存 strategyId:{}, awardId:{}", strategyId, awardId);
+                raffleStock.updateStrategyAwardStock(strategyId, awardId);
+            }
         } catch (Exception e) {
             log.error("定时任务，更新奖品库存失败", e);
         }
