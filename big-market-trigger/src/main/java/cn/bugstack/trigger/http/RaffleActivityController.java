@@ -81,11 +81,6 @@ public class RaffleActivityController implements IRaffleActivityService {
     @Resource
     private IRaffleActivitySkuProductService raffleActivitySkuProductService;
 
-    @RequestMapping(value = "test", method = RequestMethod.GET)
-    public Response<String> demo(){
-        return Response.<String>builder().code("200").info("success").data("hello,world").build();
-    }
-
     /**
      * 活动装配 - 数据预热 | 把活动配置的对应的sku一起预热
      * @param activityId 活动ID
@@ -201,7 +196,6 @@ public class RaffleActivityController implements IRaffleActivityService {
     }
 
     private RaffleAwardEntity draw(String userId, Long activityId){
-        int i = 1/0;
         //2.参与活动 - 创建参与记录订单
         UserRaffleOrderEntity raffleOrderEntity = raffleActivityPartakeService.createOrder(userId, activityId);
         log.info("活动抽奖，创建订单 userId:{} activityId:{} orderId:{}", userId, activityId, raffleOrderEntity.getOrderId());

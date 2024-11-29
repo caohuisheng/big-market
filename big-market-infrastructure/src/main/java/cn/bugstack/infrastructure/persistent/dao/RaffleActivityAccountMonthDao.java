@@ -3,6 +3,7 @@ package cn.bugstack.infrastructure.persistent.dao;
 import cn.bugstack.infrastructure.persistent.po.RaffleActivityAccountMonth;
 import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * Author: chs
@@ -17,7 +18,7 @@ public interface RaffleActivityAccountMonthDao {
     @DBRouter(key = "userId")
     RaffleActivityAccountMonth queryActivityAccountMonthByUserId(RaffleActivityAccountMonth activityAccountMonthReq);
 
-    int updateActivityAccountMonth(String userId, Long activityId, String month);
+    int updateActivityAccountMonth(@Param("userId") String userId, @Param("activityId") Long activityId, @Param("month") String month);
 
     void addAccountQuota(RaffleActivityAccountMonth raffleActivityAccountMonth);
 }

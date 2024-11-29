@@ -25,7 +25,7 @@ public interface IRaffleActivityAccountQuotaService {
      * @param userId 用户id
      * @return 日参与次数
      */
-    Integer queryRaffleActivityAccountDayPartakeCount(Long activityId, String userId);
+    Integer queryRaffleActivityAccountDayPartakeCount(String userId, Long activityId);
 
     /**
      * 查询活动账户 - 总参与次数

@@ -93,15 +93,16 @@ public class RaffleStrategyController implements IRaffleStrategyService {
             //4.查询规则配置
             Map<String, Integer> ruleLockCountMap = raffleRule.queryAwardRuleLockCount(treeIds);
             //4.查询抽奖次数
-            Integer dayPartakeCount = raffleActivityAccountQuotaService.queryRaffleActivityAccountDayPartakeCount(activityId, userId);
+            // Integer dayPartakeCount = raffleActivityAccountQuotaService.queryRaffleActivityAccountDayPartakeCount(activityId, userId);
+            Integer totalPartakeCount = raffleActivityAccountQuotaService.queryRaffleActivityAccountPartakeCount(userId, activityId);
             //5.封装结果
             List<RaffleAwardListResponseDTO> raffleAwardListResponseDTOS = strategyAwardEntities.stream().map(strategyAward -> {
                 Integer awardRuleLockCount = ruleLockCountMap.get(strategyAward.getRuleModels());
                 RaffleAwardListResponseDTO raffleAwardListResponseDTO = new RaffleAwardListResponseDTO();
                 BeanUtils.copyProperties(strategyAward, raffleAwardListResponseDTO);
                 raffleAwardListResponseDTO.setAwardRuleLockCount(awardRuleLockCount);
-                raffleAwardListResponseDTO.setIsAwardUnlock(awardRuleLockCount == null?true:(dayPartakeCount >= awardRuleLockCount));
-                raffleAwardListResponseDTO.setWaitUnLockCount(awardRuleLockCount == null?null : (dayPartakeCount >= awardRuleLockCount) ? 0:(awardRuleLockCount - dayPartakeCount));
+                raffleAwardListResponseDTO.setIsAwardUnlock(awardRuleLockCount == null?true:(totalPartakeCount >= awardRuleLockCount));
+                raffleAwardListResponseDTO.setWaitUnLockCount(awardRuleLockCount == null?null : (totalPartakeCount >= awardRuleLockCount) ? 0:(awardRuleLockCount - totalPartakeCount));
                 return raffleAwardListResponseDTO;
             }).collect(Collectors.toList());
 

@@ -4,6 +4,7 @@ import cn.bugstack.infrastructure.persistent.po.RaffleActivityAccountDay;
 import cn.bugstack.infrastructure.persistent.po.RaffleActivityAccountMonth;
 import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * Author: chs
@@ -18,7 +19,7 @@ public interface RaffleActivityAccountDayDao {
     @DBRouter(key = "userId")
     RaffleActivityAccountDay queryActivityAccountDayByUserId(RaffleActivityAccountDay activityAccountDayReq);
 
-    int updateActivityAccountDay(String userId, Long activityId, String day);
+    int updateActivityAccountDay(@Param("userId") String userId, @Param("activityId") Long activityId, @Param("day") String day);
 
     @DBRouter(key = "userId")
     Integer queryRaffleActivityAccountDayPartakeCount(RaffleActivityAccountDay raffleActivityAccountDayReq);
